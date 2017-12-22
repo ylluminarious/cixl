@@ -34,7 +34,7 @@ struct cx_box *cx_push(struct cx_scope *scope) {
 struct cx_box *cx_pop(struct cx_scope *scope, bool silent) {
   if (!scope->stack.count) {
     if (silent) { return NULL; }
-    cx_error(scope->cx, "Stack is empty at %d:%d", scope->cx->row, scope->cx->col);
+    cx_error(scope->cx, scope->cx->row, scope->cx->col, "Stack is empty");
   }
 
   return cx_vec_pop(&scope->stack);
@@ -43,7 +43,7 @@ struct cx_box *cx_pop(struct cx_scope *scope, bool silent) {
 struct cx_box *cx_peek(struct cx_scope *scope, bool silent) {
   if (!scope->stack.count) {
     if (silent) { return NULL; }
-    cx_error(scope->cx, "Stack is empty at %d:%d", scope->cx->row, scope->cx->col);
+    cx_error(scope->cx, scope->cx->row, scope->cx->col, "Stack is empty");
   }
 
   return cx_vec_peek(&scope->stack);
@@ -82,9 +82,7 @@ struct cx_box *cx_get(struct cx_scope *scope, const char *id, bool silent) {
   struct cx_var *var = cx_set_get(&scope->env, &id);
 
   if (!var && !silent) {
-    cx_error(scope->cx,
-	     "Unknown variable '%s' at %d:%d",
-	     id, scope->cx->row, scope->cx->col);
+    cx_error(scope->cx, scope->cx->row, scope->cx->col, "Unknown variable: '%s'", id);
     return scope->parent ? cx_get(scope->parent, id, silent) : NULL;
   }
 

@@ -39,7 +39,7 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t i) {
 	cx_copy_value(cx_box_init(cx_push(s), v.type), &v);
       }
     } else {
-      cx_error(cx, "Unknown identifier '%s' at %d:%d", id, t->row, t->col);
+      cx_error(cx, t->row, t->col, "Unknown id: '%s'", id);
       return -1;
     }
   }
@@ -73,7 +73,7 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   case CX_TMACRO:
     return cx_eval_macro(cx, toks, i);
   default:
-    cx_error(cx, "Unexpected token at %d:%d", t->row, t->col);
+    cx_error(cx, t->row, t->col, "Unexpected token");
   }
 
   return -1;

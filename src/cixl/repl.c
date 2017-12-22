@@ -4,6 +4,7 @@
 
 #include "cixl/buf.h"
 #include "cixl/cx.h"
+#include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/repl.h"
 #include "cixl/scope.h"
@@ -31,9 +32,9 @@ void cx_repl(FILE *in, FILE *out) {
       if (cx_eval_str(&cx, body.data)) {
 	cx_fprint_stack(cx_scope(&cx), out);
       } else {
-	cx_do_vec(&cx.errors, char *, e) {
-	  fprintf(out, "Error: %s\n", *e);
-	  free(*e);
+	cx_do_vec(&cx.errors, struct cx_error, e) {
+	  fprintf(out, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);
+	  cx_error_deinit(e);
 	}
 	
 	cx_vec_clear(&cx.errors);

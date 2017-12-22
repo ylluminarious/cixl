@@ -71,7 +71,7 @@ static bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
 	cx->col = col;
       }
     } else {
-      cx_error(cx, "Failed parsing id at %d:%d", cx->row, cx->col);
+      cx_error(cx, cx->row, cx->col, "Failed parsing id");
       ok = false;
     }
     
@@ -117,7 +117,7 @@ static bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
 	cx->col = col;
       }
     } else {
-      cx_error(cx, "Failed parsing int at %d:%d", cx->row, cx->col);
+      cx_error(cx, cx->row, cx->col, "Failed parsing int");
       ok = false;
     }
     
@@ -159,7 +159,7 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out) {
 	  return cx_parse_id(cx, in, out);
 	}
 
-	cx_error(cx, "Unexpected '%c' (#%d) at %d:%d", c, c, row, col); 
+	cx_error(cx, row, col, "Unexpected char: '%c' (#%d)", c, c); 
 	return false;
       }
   }
@@ -172,7 +172,7 @@ bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out) {
   
   while (depth) {
     if (!cx_parse_tok(cx, in, out)) {
-      cx_error(cx, "Missing end at %d:%d", row, col);
+      cx_error(cx, row, col, "Missing end");
       return false;
     }
     

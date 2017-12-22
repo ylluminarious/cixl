@@ -19,6 +19,14 @@
 
 struct cx;
 
-void cx_error(struct cx *cx, const char *spec, ...);
+struct cx_error {
+  int row, col;
+  char *msg;
+};
+
+struct cx_error *cx_error_init(struct cx_error *e, int row, int col, char *msg);
+struct cx_error *cx_error_deinit(struct cx_error *e);
+
+struct cx_error *cx_error(struct cx *cx, int row, int col, const char *spec, ...);
 
 #endif

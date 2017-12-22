@@ -48,7 +48,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   
   if (!cx_parse_tok(cx, in, &eval->toks)) {
-    cx_error(cx, "Malformed let binding at %d:%d", row, col);
+    cx_error(cx, row, col, "Malformed let");
     free(cx_macro_eval_deinit(eval));
     return false;
   }
@@ -56,13 +56,13 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_tok *id = cx_vec_peek(&eval->toks);
 
   if (id->type != CX_TID) {
-    cx_error(cx, "Invalid id at %d:%d", row, col);
+    cx_error(cx, row, col, "Invalid id");
     free(cx_macro_eval_deinit(eval));
     return false;
   }
   
   if (!cx_parse_end(cx, in, &eval->toks)) {
-    cx_error(cx, "Empty let binding at %d:%d", row, col);
+    cx_error(cx, row, col, "Empty let");
     free(cx_macro_eval_deinit(eval));
     return false;
   }
@@ -90,7 +90,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->main = cx_begin(cx, false);
   
   cx->row = cx->col = -1;
-  cx_vec_init(&cx->errors, sizeof(char *));
+  cx_vec_init(&cx->errors, sizeof(struct cx_error));
   return cx;
 }
 
@@ -125,7 +125,7 @@ struct cx_type *cx_add_type(struct cx *cx, const char *id, ...) {
   struct cx_type **t = cx_ok(cx_set_insert(&cx->types, &id));
 
   if (!t) {
-    cx_error(cx, "Duplicate type '%s' at %d:%d", id, cx->row, cx->col);
+    cx_error(cx, cx->row, cx->col, "Duplicate type: '%s'", id);
     return NULL;
   }
   
@@ -143,7 +143,7 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
   struct cx_type **t = cx_set_get(&cx->types, &id);
 
   if (!t && !silent) {
-    cx_error(cx, "Unknown type '%s' at %d:%d", id, cx->row, cx->col);
+    cx_error(cx, cx->row, cx->col, "Unknown type: '%s'", id);
   }
 
   return t ? *t : NULL;
@@ -153,7 +153,7 @@ struct cx_macro *cx_add_macro(struct cx *cx, const char *id, cx_macro_parse_t im
   struct cx_macro **m = cx_ok(cx_set_insert(&cx->macros, &id));
 
   if (!m) {
-    cx_error(cx, "Duplicate macro '%s' at %d:%d", id, cx->row, cx->col);
+    cx_error(cx, cx->row, cx->col, "Duplicate macro: '%s'", id);
     return NULL;
   }
 
@@ -165,7 +165,7 @@ struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent) {
   struct cx_macro **m = cx_set_get(&cx->macros, &id);
 
   if (!m && !silent) {
-    cx_error(cx, "Unknown macro '%s' at %d:%d", id, cx->row, cx->col);
+    cx_error(cx, cx->row, cx->col, "Unknown macro: '%s'", id);
   }
   
   return m ? *m : NULL;
