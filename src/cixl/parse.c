@@ -41,7 +41,7 @@ struct cx_tok *cx_tok_deinit(struct cx_tok *tok) {
 
 static bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_buf id;
-  cx_buf_init(&id);
+  cx_buf_open(&id);
   bool ok = true;
   int col = cx->col;
   
@@ -58,8 +58,9 @@ static bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
  exit: {
+    cx_buf_close(&id);
+
     if (ok) {
-      cx_buf_close(&id);
       struct cx_macro *m = cx_get_macro(cx, id.data, true);
       
       if (m) {
@@ -72,17 +73,16 @@ static bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
       }
     } else {
       cx_error(cx, cx->row, cx->col, "Failed parsing id");
-      ok = false;
+      free(id.data);
     }
     
-    cx_buf_deinit(&id);
     return ok;
   }
 }
 
 static bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_buf value;
-  cx_buf_init(&value);
+  cx_buf_open(&value);
   int col = cx->col;
   bool ok = true;
   
@@ -98,9 +98,10 @@ static bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
     col++;
   }
 
-  exit:
+ exit: {
+    cx_buf_close(&value);
+    
     if (ok) {
-      cx_buf_close(&value);
       cx_int_t int_value = strtoimax(value.data, NULL, 10);
       free(value.data);
       
@@ -113,16 +114,16 @@ static bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
 		    CX_TLITERAL,
 		    box,
 		    cx->row, cx->col);
-
+	
 	cx->col = col;
       }
     } else {
       cx_error(cx, cx->row, cx->col, "Failed parsing int");
-      ok = false;
+      free(value.data);
     }
     
-    cx_buf_deinit(&value);
     return ok;
+  }
 }
 
 bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out) {

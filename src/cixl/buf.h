@@ -9,8 +9,7 @@ struct cx_buf {
   FILE *stream;
 };
 
-struct cx_buf *cx_buf_init(struct cx_buf *buf);
-struct cx_buf *cx_buf_deinit(struct cx_buf *buf);
-void cx_buf_close(struct cx_buf *buf);
+struct cx_buf *cx_buf_open(struct cx_buf *buf);
+struct cx_buf *cx_buf_close(struct cx_buf *buf);
 
 #endif

@@ -17,7 +17,7 @@ void cx_repl(FILE *in, FILE *out) {
   cx_init(&cx);
   
   struct cx_buf body;
-  cx_buf_init(&body);
+  cx_buf_open(&body);
   char line[CX_REPL_LINE_MAX];
 
   while (true) {
@@ -41,14 +41,14 @@ void cx_repl(FILE *in, FILE *out) {
       }
 
       free(body.data);
-      cx_buf_init(&body);
+      cx_buf_open(&body);
     } else {
       if (strcmp(line, "quit\n") == 0) { break; }
       fputs(line, body.stream);
     }
   }
 
-  cx_buf_deinit(&body);
+  cx_buf_close(&body);
   free(body.data);
   cx_deinit(&cx);
 }
