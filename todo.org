@@ -1,0 +1,8 @@
+* add cx_func/imp
+** add func_arg
+*** type or int
+* convert '$', '_' and '!' to funcs
+* add test functions from mixl
+* add str support
+** dup on box copy
+* add () scope support
