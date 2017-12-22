@@ -1,10 +1,12 @@
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
+#include "cixl/func.h"
 #include "cixl/int.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
@@ -18,6 +20,11 @@ static const void *get_type_id(const void *value) {
 static const void *get_macro_id(const void *value) {
   struct cx_macro *const *macro = value;
   return &(*macro)->id;
+}
+
+static const void *get_func_id(const void *value) {
+  struct cx_func *const *func = value;
+  return &(*func)->id;
 }
 
 static ssize_t let_eval(struct cx_macro_eval *eval,
@@ -71,6 +78,11 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
+void int_add(struct cx_scope *scope) {
+  struct cx_box y = *cx_ok(cx_pop(scope, false)), x = *cx_ok(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int + y.as_int;
+}
+
 struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
   cx_add_separators(cx, " \t\n;(){}[]");
@@ -85,6 +97,13 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->macros, sizeof(struct cx_macro *), cx_cmp_str);
   cx->macros.key = get_macro_id;
   cx_add_macro(cx, "let:", let_parse);
+
+  cx_set_init(&cx->funcs, sizeof(struct cx_func *), cx_cmp_str);
+  cx->funcs.key = get_func_id;
+  
+  cx_add_func(cx, "+",
+	      cx_arg(cx->int_type),
+	      cx_arg(cx->int_type))->ptr = int_add;
   
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx->main = cx_begin(cx, false);
@@ -105,6 +124,9 @@ struct cx *cx_deinit(struct cx *cx) {
 
   cx_do_set(&cx->macros, struct cx_macro *, m) { free(cx_macro_deinit(*m)); }
   cx_set_deinit(&cx->macros);
+
+  cx_do_set(&cx->funcs, struct cx_func *, f) { free(cx_func_deinit(*f)); }
+  cx_set_deinit(&cx->funcs);
 
   cx_do_vec(&cx->errors, char *, e) { free(*e); }
   cx_vec_deinit(&cx->errors);
@@ -148,6 +170,38 @@ struct cx_type *cx_get_type(struct cx *cx, const char *id, bool silent) {
 
   return t ? *t : NULL;
 }
+
+struct cx_func_imp *_cx_add_func(struct cx *cx,
+				 const char *id,
+				 int nargs,
+				 struct cx_func_arg *args) {
+  struct cx_func **f = cx_set_get(&cx->funcs, &id);
+
+  if (f) {
+    if ((*f)->nargs != nargs) {
+      cx_error(cx,
+	       cx->row, cx->col,
+	       "Wrong number of args for func '%s': %d/%d",
+	       id, nargs, (*f)->nargs);
+    }
+  } else {
+    f = cx_set_insert(&cx->funcs, &id);
+    *f = cx_func_init(malloc(sizeof(struct cx_func)), strdup(id), nargs);
+  }
+  
+  return cx_func_add_imp(*f, nargs, args);
+}
+
+struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent) {
+  struct cx_func **f = cx_set_get(&cx->funcs, &id);
+
+  if (!f && !silent) {
+    cx_error(cx, cx->row, cx->col, "Unknown func: '%s'", id);
+  }
+
+  return f ? *f : NULL;
+}
+
 
 struct cx_macro *cx_add_macro(struct cx *cx, const char *id, cx_macro_parse_t imp) {
   struct cx_macro **m = cx_ok(cx_set_insert(&cx->macros, &id));

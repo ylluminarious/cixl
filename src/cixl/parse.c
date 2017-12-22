@@ -68,7 +68,15 @@ static bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
 	ok = m->imp(cx, in, out);
 	free(id.data);
       } else {
-	cx_tok_init(cx_vec_push(out), CX_TID, id.data, cx->row, cx->col);
+	if (id.data[0] == '$' || isupper(id.data[0])) {
+	  cx_tok_init(cx_vec_push(out), CX_TID, id.data, cx->row, cx->col);
+	} else {
+	  struct cx_func *f = cx_get_func(cx, id.data, false);
+	  if (!f) { return false; }
+	  cx_tok_init(cx_vec_push(out), CX_TFUNC, f, cx->row, cx->col);
+	  free(id.data);
+	}
+	
 	cx->col = col;
       }
     } else {

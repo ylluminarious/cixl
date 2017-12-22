@@ -5,6 +5,7 @@
 
 #include "cixl/set.h"
 
+struct cx_scope;
 struct cx_type;
 
 struct cx_func {
@@ -19,11 +20,11 @@ struct cx_func *cx_func_deinit(struct cx_func *func);
 struct cx_func_imp {
   char *id;
   struct cx_vec args;
+  void (*ptr)(struct cx_scope *);
 };
 
 struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp, char *id);
 struct cx_func_imp *cx_func_imp_deinit(struct cx_func_imp *imp);
-struct cx_func_imp *cx_func_add_imp(struct cx_func *func, va_list args);
 
 struct cx_func_arg {
   struct cx_type *type;
@@ -32,5 +33,11 @@ struct cx_func_arg {
 
 struct cx_func_arg cx_arg(struct cx_type *type);
 struct cx_func_arg cx_narg(int n);
+
+struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
+				    int nargs,
+				    struct cx_func_arg *args);
+
+struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *args);
 
 #endif

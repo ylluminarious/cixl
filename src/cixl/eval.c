@@ -6,6 +6,7 @@
 #include "cixl/cx.h"
 #include "cixl/eval.h"
 #include "cixl/error.h"
+#include "cixl/func.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/vec.h"
@@ -21,16 +22,16 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t i) {
     box->type = cx->meta_type;
     box->as_type = type;
   } else {
-    if (strcmp(id, "!") == 0) {
-      cx_reset(cx_scope(cx));
-    } else if (strcmp(id, "_") == 0) {
-      cx_pop(cx_scope(cx), false);
-    } else if (id[0] == '$' && id[1]) {
+    if (id[0] == '$') {
       struct cx_scope *s = cx_scope(cx);
       struct cx_box *v = cx_get(s, id+1, false);
       if (!v) { return -1; }
       cx_copy_value(cx_box_init(cx_push(s), v->type), v);
-    } else if (strcmp(id, "$") == 0) {
+    } else if (strcmp(id, "!") == 0) {
+      cx_reset(cx_scope(cx));
+    } else if (strcmp(id, "_") == 0) {
+      cx_pop(cx_scope(cx), false);
+    } else if (strcmp(id, "@") == 0) {
       struct cx_scope *s = cx_scope(cx);
       struct cx_box *vp = cx_peek(s, false);
 
@@ -56,7 +57,34 @@ ssize_t cx_eval_literal(struct cx *cx, struct cx_vec *toks, ssize_t i) {
 ssize_t cx_eval_macro(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   struct cx_tok *t = cx_vec_get(toks, i);
   struct cx_macro_eval *eval = t->data;
-  return eval->imp(eval, cx, toks, i);
+  return eval->imp(eval, cx, toks, i+1);
+}
+
+ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t i) {
+  struct cx_tok *t = cx_vec_get(toks, i++);
+  struct cx_func *func = t->data;
+  int row = cx->row, col = cx->col;
+
+  while (i < toks->count && cx_scope(cx)->stack.count < func->nargs) {
+    if ((i = cx_eval_tok(cx, toks, i)) == -1) { return -1; }
+  }
+
+  struct cx_scope *scope = cx_scope(cx);
+
+  if (scope->stack.count < func->nargs) {
+    cx_error(cx, row, col, "Not enough args for func: '%s'", func->id);
+    return -1;
+  }
+
+  struct cx_func_imp *imp = cx_func_get_imp(func, &scope->stack);
+
+  if (!imp) {
+    cx_error(cx, row, col, "Func not applicable: '%s'", func->id);
+    return -1;
+  }
+
+  imp->ptr(scope);
+  return i;
 }
 
 ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t i) {
@@ -66,6 +94,8 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   cx->col = t->col;
   
   switch (t->type) {
+  case CX_TFUNC:
+    return cx_eval_func(cx, toks, i);
   case CX_TID:
     return cx_eval_id(cx, toks, i);
   case CX_TLITERAL:
@@ -73,7 +103,7 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   case CX_TMACRO:
     return cx_eval_macro(cx, toks, i);
   default:
-    cx_error(cx, t->row, t->col, "Unexpected token");
+    cx_error(cx, t->row, t->col, "Unexpected token: %d", t->type);
   }
 
   return -1;
