@@ -6,7 +6,7 @@
 ```
 cixl v0.1
 
-Press Return twice to evaluate input.
+Press Return twice to eval input.
 
 > 1 2 3
 ..
@@ -23,6 +23,18 @@ Press Return twice to evaluate input.
 > !
 ..
 []
+
+> 1 + 2
+..
+[3]
+
+> 1 2 +
+..
+[3 3]
+
+> + 1 2
+..
+[6 1 2]
 
 > let: foo 42;
 ..

@@ -11,7 +11,7 @@
 
 void cx_repl(FILE *in, FILE *out) {
   fprintf(out, "cixl v%s\n\n", CX_VERSION);
-  fputs("Press Return twice to evaluate input.\n\n", out);
+  fputs("Press Return twice to eval input.\n\n", out);
 
   struct cx cx;
   cx_init(&cx);

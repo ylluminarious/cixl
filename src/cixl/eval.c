@@ -27,18 +27,6 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t i) {
       struct cx_box *v = cx_get(s, id+1, false);
       if (!v) { return -1; }
       cx_copy_value(cx_box_init(cx_push(s), v->type), v);
-    } else if (strcmp(id, "!") == 0) {
-      cx_reset(cx_scope(cx));
-    } else if (strcmp(id, "_") == 0) {
-      cx_pop(cx_scope(cx), false);
-    } else if (strcmp(id, "@") == 0) {
-      struct cx_scope *s = cx_scope(cx);
-      struct cx_box *vp = cx_peek(s, false);
-
-      if (vp) {
-	struct cx_box v = *vp;
-	cx_copy_value(cx_box_init(cx_push(s), v.type), &v);
-      }
     } else {
       cx_error(cx, t->row, t->col, "Unknown id: '%s'", id);
       return -1;
