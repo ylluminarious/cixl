@@ -1,6 +1,7 @@
 #ifndef CX_BOX_H
 #define CX_BOX_H
 
+#include <stdbool.h>
 #include <stdio.h>
 #include "cixl/int.h"
 
@@ -10,6 +11,7 @@ struct cx_box {
   struct cx_type *type;
   
   union {
+    bool as_bool;
     cx_int_t as_int;
     struct cx_type *as_type;
   };

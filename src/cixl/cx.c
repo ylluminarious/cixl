@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cixl/bool.h"
 #include "cixl/box.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -92,11 +93,6 @@ static void reset_imp(struct cx_scope *scope) {
   cx_reset(scope);
 }
 
-static void int_add_imp(struct cx_scope *scope) {
-  struct cx_box y = *cx_ok(cx_pop(scope, false)), x = *cx_ok(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int + y.as_int;
-}
-
 struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
   cx_add_separators(cx, " \t\n;(){}[]");
@@ -104,10 +100,6 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->types, sizeof(struct cx_type *), cx_cmp_str);
   cx->types.key = get_type_id;
   
-  cx->any_type = cx_add_type(cx, "Any", NULL);
-  cx_add_meta_type(cx);
-  cx_add_int_type(cx);
-
   cx_set_init(&cx->macros, sizeof(struct cx_macro *), cx_cmp_str);
   cx->macros.key = get_macro_id;
   cx_add_macro(cx, "let:", let_parse);
@@ -115,13 +107,15 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->funcs, sizeof(struct cx_func *), cx_cmp_str);
   cx->funcs.key = get_func_id;
   
+  cx->any_type = cx_add_type(cx, "Any", NULL);
+
+  cx_add_bool_type(cx);
+  cx_add_int_type(cx);
+  cx_add_meta_type(cx);
+  
   cx_add_func(cx, "@", cx_arg(cx->any_type))->ptr = dup_imp;
   cx_add_func(cx, "_", cx_arg(cx->any_type))->ptr = drop_imp;
   cx_add_func(cx, "!")->ptr = reset_imp;
-
-  cx_add_func(cx, "+",
-	      cx_arg(cx->int_type),
-	      cx_arg(cx->int_type))->ptr = int_add_imp;
   
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx->main = cx_begin(cx, false);
