@@ -12,6 +12,15 @@ Press Return twice to eval input.
 ..
 [1 2 3]
 
+> quit
+```
+
+This project aims to produce a minimalistic extension language, or language substrate; in C + GNU-extensions. In a way, it's Lua taken one step further. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on transparency, flexibility and simplicity.
+
+### Stack
+The parameter stack is exposed to user code, just like in Forth.
+
+```
 > 4 5 dup
 ..
 [1 2 3 4 5 5]
@@ -27,7 +36,12 @@ Press Return twice to eval input.
 > cls
 ..
 []
+```
 
+### Math
+But unlike Forth, functions scan forward until enough arguments are on the stack.
+
+```
 > 1 + 2
 ..
 [3]
@@ -43,7 +57,12 @@ Press Return twice to eval input.
 > + +
 ..
 [9]
+```
 
+### Variables
+Named variables may be bound once per scope using the ```let:```-macro.
+
+```
 > let: foo 42;
 ..
 []
@@ -51,7 +70,12 @@ Press Return twice to eval input.
 > $foo
 ..
 [42]
+```
 
+### Lambdas
+Braces quote contained code, which is then pushed on the stack.
+
+```
 > {1 2 3}
 ..
 [Lambda(0x52d97d0:1)]
@@ -59,6 +83,36 @@ Press Return twice to eval input.
 > call
 ..
 [1 2 3]
+```
+
+### Scopes
+Enclosing code in parens results in code being evaluated in a separate scope, the last value on the stack is automatically pushed on the parent stack on scope exit. The parent environment in reachable from within the scope, but variables set inside the scope are not visible from the outside.
+
+```
+> (1 2 3)
+..
+[3]
+
+> let: foo 1; (let: foo 2; $foo) $foo
+[2 1]
+```
+
+### Functions
+The ```func:```-macro may be used to define named functions. An integer may be specified instead of argument type, which is then substituted for the actual type on evaluation.
+
+```
+> func: foo() 42; foo
+..
+[42]
+
+> func: bar(x Int) $x + 35; cls bar 7
+..
+[42]
+
+> func: baz(x y Int z 0) $x + $y + $z; cls baz 1 3 5
+..
+[9]
+
 ```
 
 ### License
