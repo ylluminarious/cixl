@@ -7,7 +7,8 @@
 struct cx;
 struct cx_vec;
 
-enum cx_tok_type { CX_TEND, CX_TFUNC, CX_TID, CX_TLITERAL, CX_TMACRO };
+enum cx_tok_type { CX_TEND, CX_TFUNC, CX_TGROUP, CX_TID, CX_TLITERAL, CX_TMACRO,
+		   CX_TUNGROUP };
 
 struct cx_tok {
   enum cx_tok_type type;

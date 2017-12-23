@@ -258,11 +258,16 @@ struct cx_scope *cx_begin(struct cx *cx, bool child) {
 
 void cx_end(struct cx *cx) {
   cx_ok(cx->scopes.count > 1);
-  struct cx_scope **s = cx_vec_pop(&cx->scopes);
-  free(cx_scope_deinit(*s));
+  struct cx_scope *s = *(struct cx_scope **)cx_vec_pop(&cx->scopes);
+
+  if (s->stack.count) {
+    struct cx_box *v = cx_vec_pop(&s->stack);
+    *cx_push(cx_scope(cx)) = *v;   
+  }
+  
+  free(cx_scope_deinit(s));
 }
 
 struct cx_scope *cx_scope(struct cx *cx) {
-  cx_ok(cx->scopes.count);
-  return *(struct cx_scope **)cx_vec_get(&cx->scopes, cx->scopes.count-1);
+  return *(struct cx_scope **)cx_vec_peek(&cx->scopes);
 }

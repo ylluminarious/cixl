@@ -75,6 +75,15 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   return i;
 }
 
+ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t i) {
+  struct cx_tok *t = cx_vec_get(toks, i);
+  struct cx_vec *body = t->data;
+  cx_begin(cx, true);
+  if (!cx_eval(cx, body, 0)) { return -1; }
+  cx_end(cx);
+  return i+1;
+}
+
 ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   cx_ok(toks->count);
   struct cx_tok *t = cx_vec_get(toks, i);
@@ -84,6 +93,8 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   switch (t->type) {
   case CX_TFUNC:
     return cx_eval_func(cx, toks, i);
+  case CX_TGROUP:
+    return cx_eval_group(cx, toks, i);
   case CX_TID:
     return cx_eval_id(cx, toks, i);
   case CX_TLITERAL:

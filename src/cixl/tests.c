@@ -22,6 +22,17 @@ static void stack_tests() {
 
   run(&cx, "7 14 @ + 28 = test");
   run(&cx, "7 14 @ _ + 21 = test");
+
+  cx_deinit(&cx);
+}
+
+static void group_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "(7 14 21) 21 = test");
+
+  cx_deinit(&cx);
 }
 
 static void int_tests() {
@@ -32,9 +43,12 @@ static void int_tests() {
   run(&cx, "0 ? not test");
   run(&cx, "21 + 21 = 42 test");
   run(&cx, "1 = 2 not test");
+
+  cx_deinit(&cx);
 }
 
 void cx_tests() {
   stack_tests();
+  group_tests();
   int_tests();
 }

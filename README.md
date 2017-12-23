@@ -20,6 +20,10 @@ Press Return twice to eval input.
 ..
 [1 2 3 4 5]
 
+> (6 7 8)
+..
+[1 2 3 4 5 8]
+
 > !
 ..
 []
@@ -43,6 +47,7 @@ Press Return twice to eval input.
 > let: foo 42;
 ..
 []
+
 > $foo
 ..
 [42]

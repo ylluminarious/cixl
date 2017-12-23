@@ -25,6 +25,12 @@ struct cx_tok *cx_tok_init(struct cx_tok *tok,
 
 struct cx_tok *cx_tok_deinit(struct cx_tok *tok) {
   switch (tok->type) {
+  case CX_TGROUP: {
+    struct cx_vec *body = tok->data;
+    cx_do_vec(body, struct cx_tok, t) { cx_tok_deinit(t); }
+    free(cx_vec_deinit(body));
+    break;
+  }
   case CX_TID:
   case CX_TLITERAL:
     if (tok->data) { free(tok->data); }
@@ -136,6 +142,28 @@ static bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
+static bool cx_parse_group(struct cx *cx, FILE *in, struct cx_vec *out) {
+  int row = cx->row, col = cx->col;
+  struct cx_vec *body = cx_vec_init(malloc(sizeof(struct cx_vec)),
+				    sizeof(struct cx_tok));
+  
+  while (true) {
+    if (!cx_parse_tok(cx, in, body)) {
+      free(body);
+      return false;
+    }
+
+    struct cx_tok *tok = cx_vec_peek(body);
+    if (tok->type == CX_TUNGROUP) {
+      cx_tok_deinit(cx_vec_pop(body));
+      break;
+    }
+  }
+
+  cx_tok_init(cx_vec_push(out), CX_TGROUP, body, row, col);
+  return true;
+}
+
 bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   bool done = false;
@@ -160,6 +188,11 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out) {
       case ';':
 	cx_tok_init(cx_vec_push(out), CX_TEND, NULL, row, col);
 	return true;
+      case '(':
+	return cx_parse_group(cx, in, out);
+      case ')':
+	cx_tok_init(cx_vec_push(out), CX_TUNGROUP, NULL, row, col);
+	return true;	
       default:
 	if (isdigit(c)) {
 	  ungetc(c, in);
