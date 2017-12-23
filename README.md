@@ -37,8 +37,8 @@ The parameter stack is exposed to user code, just like in Forth.
 []
 ```
 
-### Math
-But unlike Forth, functions scan forward until enough arguments are on the stack to allow reordering parameters and operations to fit the problem being solved.
+### Expressions
+But unlike Forth, functions scan forward until enough arguments are on the stack to allow reordering parameters and operations in user code to fit the problem being solved.
 
 ```
 > 1 + 2
@@ -116,3 +116,5 @@ The ```func:```-macro may be used to define named functions. An integer may be s
 
 ### License
 GPLv3
+
+Give me a yell if something is unclear, wrong or missing. And please do consider helping out with a [donation](https://liberapay.com/basic-gongfu/donate) if you find this useful, every contribution counts.
