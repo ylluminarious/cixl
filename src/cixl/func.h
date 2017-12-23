@@ -14,13 +14,14 @@ struct cx_func {
   int nargs;
 };
 
-struct cx_func *cx_func_init(struct cx_func *func, char *id, int nargs);
+struct cx_func *cx_func_init(struct cx_func *func, const char *id, int nargs);
 struct cx_func *cx_func_deinit(struct cx_func *func);
 			  
 struct cx_func_imp {
   char *id;
   struct cx_vec args;
   void (*ptr)(struct cx_scope *);
+  struct cx_vec toks;
 };
 
 struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp, char *id);

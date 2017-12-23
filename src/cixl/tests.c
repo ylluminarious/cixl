@@ -20,8 +20,8 @@ static void stack_tests() {
   struct cx cx;
   cx_init(&cx);
 
-  run(&cx, "7 14 @ + 28 = test");
-  run(&cx, "7 14 @ _ + 21 = test");
+  run(&cx, "7 14 dup + 28 = test");
+  run(&cx, "7 14 dup zap + 21 = test");
 
   cx_deinit(&cx);
 }
@@ -47,8 +47,20 @@ static void int_tests() {
   cx_deinit(&cx);
 }
 
+static void func_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "func: foo() 42; foo = 42 test");
+  run(&cx, "func: bar(x Int) $x + 35; bar 7 42 = test");
+  run(&cx, "func: baz(x y Int z 0) $x + $y + $z; baz 1 3 5 9 = test");
+
+  cx_deinit(&cx);
+}
+
 void cx_tests() {
   stack_tests();
   group_tests();
   int_tests();
+  func_tests();
 }

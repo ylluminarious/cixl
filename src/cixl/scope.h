@@ -22,7 +22,6 @@ struct cx_scope *cx_scope_deinit(struct cx_scope *scope);
 struct cx_box *cx_push(struct cx_scope *scope);
 struct cx_box *cx_pop(struct cx_scope *scope, bool silent);
 struct cx_box *cx_peek(struct cx_scope *scope, bool silent);
-void cx_reset(struct cx_scope *scope);
 void cx_fprint_stack(struct cx_scope *scope, FILE *out);
 
 struct cx_box *cx_set(struct cx_scope *scope, const char *id);

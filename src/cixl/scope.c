@@ -49,10 +49,6 @@ struct cx_box *cx_peek(struct cx_scope *scope, bool silent) {
   return cx_vec_peek(&scope->stack);
 }
 
-void cx_reset(struct cx_scope *scope) {
-  cx_vec_clear(&scope->stack);
-}
-
 void cx_fprint_stack(struct cx_scope *scope, FILE *out) {
   fputc('[', out);
   char sep = 0;

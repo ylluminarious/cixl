@@ -12,11 +12,11 @@ Press Return twice to eval input.
 ..
 [1 2 3]
 
-> 4 5 @
+> 4 5 dup
 ..
 [1 2 3 4 5 5]
 
-> _
+> zap
 ..
 [1 2 3 4 5]
 
@@ -24,7 +24,7 @@ Press Return twice to eval input.
 ..
 [1 2 3 4 5 8]
 
-> !
+> cls
 ..
 []
 

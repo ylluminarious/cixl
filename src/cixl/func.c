@@ -1,8 +1,10 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "cixl/box.h"
 #include "cixl/buf.h"
 #include "cixl/func.h"
+#include "cixl/parse.h"
 #include "cixl/type.h"
 
 static const void *get_imp_id(const void *value) {
@@ -10,8 +12,8 @@ static const void *get_imp_id(const void *value) {
   return &(*imp)->id;
 }
 
-struct cx_func *cx_func_init(struct cx_func *func, char *id, int nargs) {
-  func->id = id;
+struct cx_func *cx_func_init(struct cx_func *func, const char *id, int nargs) {
+  func->id = strdup(id);
   cx_set_init(&func->imps, sizeof(struct cx_func_imp *), cx_cmp_str);
   func->imps.key = get_imp_id;
   func->nargs = nargs;
@@ -27,12 +29,17 @@ struct cx_func *cx_func_deinit(struct cx_func *func) {
 
 struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp, char *id) {
   imp->id = id;
+  imp->ptr = NULL;
+  cx_vec_init(&imp->args, sizeof(struct cx_func_arg));
+  cx_vec_init(&imp->toks, sizeof(struct cx_tok));
   return imp;
 }
 
 struct cx_func_imp *cx_func_imp_deinit(struct cx_func_imp *imp) {
   free(imp->id);
   cx_vec_deinit(&imp->args);
+  cx_do_vec(&imp->toks, struct cx_tok, t) { cx_tok_deinit(t); }
+  cx_vec_deinit(&imp->toks);
   return imp;
 }
 
@@ -67,16 +74,11 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
     
   cx_buf_close(&id);
   struct cx_func_imp *imp = cx_set_get(&func->imps, &id.data);
-  
-  if (imp) {
-    cx_vec_deinit(&imp_args);
-    free(id.data);
-  } else {
-    imp = cx_func_imp_init(malloc(sizeof(struct cx_func_imp)), id.data);
-    *(struct cx_func_imp **)cx_set_insert(&func->imps, &id.data) = imp;
-    imp->args = imp_args;
-  }
+  if (imp) { cx_set_delete(&func->imps, &id.data); }
 
+  imp = cx_func_imp_init(malloc(sizeof(struct cx_func_imp)), id.data);
+  *(struct cx_func_imp **)cx_set_insert(&func->imps, &id.data) = imp;
+  imp->args = imp_args;
   return imp;
 }
 

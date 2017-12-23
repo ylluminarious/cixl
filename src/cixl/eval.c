@@ -14,7 +14,7 @@
 ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   struct cx_tok *t = cx_vec_get(toks, i);
   char *id = t->data;
-  
+
   if (isupper(id[0])) {
     struct cx_type *type = cx_get_type(cx, id, false);
     if (!type) { return -1; }
@@ -45,14 +45,14 @@ ssize_t cx_eval_literal(struct cx *cx, struct cx_vec *toks, ssize_t i) {
 ssize_t cx_eval_macro(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   struct cx_tok *t = cx_vec_get(toks, i);
   struct cx_macro_eval *eval = t->data;
-  return eval->imp(eval, cx, toks, i+1);
+  return eval->imp(eval, cx, toks, i);
 }
 
 ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   struct cx_tok *t = cx_vec_get(toks, i++);
   struct cx_func *func = t->data;
   int row = cx->row, col = cx->col;
-
+  
   while (i < toks->count && cx_scope(cx)->stack.count < func->nargs) {
     if ((i = cx_eval_tok(cx, toks, i)) == -1) { return -1; }
   }
@@ -71,7 +71,13 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t i) {
     return -1;
   }
 
-  imp->ptr(scope);
+  if (imp->ptr) {
+    imp->ptr(scope);
+  } else {
+    if (!cx_eval(cx, &imp->toks, 0)) { return -1; }
+    cx_end(cx);
+  }
+  
   return i;
 }
 
@@ -132,4 +138,77 @@ bool cx_eval_str(struct cx *cx, const char *in) {
     cx_vec_deinit(&toks);
     return res;
   }
+}
+
+bool cx_eval_args(struct cx *cx,
+		  struct cx_vec *toks,
+		  struct cx_vec *ids,
+		  struct cx_vec *func_args) {
+  struct cx_vec tmp_ids;
+  cx_vec_init(&tmp_ids, sizeof(struct cx_tok));
+
+  cx_do_vec(toks, struct cx_tok, t) {
+    switch (t->type) {
+    case CX_TID: {
+      char *id = t->data;
+      if (isupper(id[0])) {
+	if (!tmp_ids.count) {
+	  cx_error(cx, t->row, t->col, "Missing ids for type: %s", id);
+	  cx_vec_deinit(&tmp_ids);
+	  return false;
+	}
+
+	struct cx_type *type = cx_get_type(cx, id, false);
+
+	if (!type) {
+	  cx_vec_deinit(&tmp_ids);
+	  return false;
+	}
+	
+	cx_do_vec(&tmp_ids, struct cx_tok, id) {
+	  *(struct cx_tok *)cx_vec_push(ids) = *id;
+	  *(struct cx_func_arg *)cx_vec_push(func_args) = cx_arg(type);      
+	}
+
+	cx_vec_clear(&tmp_ids);
+      } else {
+	*(struct cx_tok *)cx_vec_push(&tmp_ids) = *t;
+	t->data = NULL;
+      }
+      
+      break;
+    }
+      
+    case CX_TLITERAL: {
+      struct cx_box *v = t->data;
+
+      if (v->type != cx->int_type || v->as_int >= func_args->count) {
+	cx_error(cx, t->row, t->col, "Invalid arg: %d", v->as_int);
+	cx_vec_deinit(&tmp_ids);
+	return false;
+      }
+
+      if (!tmp_ids.count) {
+	cx_error(cx, t->row, t->col, "Missing ids for type: %d", v->as_int);
+	cx_vec_deinit(&tmp_ids);
+	return false;
+      }
+      
+      cx_do_vec(&tmp_ids, struct cx_tok, id) {
+	*(struct cx_tok *)cx_vec_push(ids) = *id;
+	*(struct cx_func_arg *)cx_vec_push(func_args) = cx_narg(v->as_int);      
+      }
+
+      break;
+    }
+      
+    default:
+	cx_error(cx, t->row, t->col, "Unexpected tok: %d", t->type);
+	cx_vec_deinit(&tmp_ids);
+	return false;
+    }
+  }
+  
+  cx_vec_deinit(&tmp_ids);
+  return true;
 }

@@ -23,7 +23,7 @@ struct cx_tok *cx_tok_init(struct cx_tok *tok,
 
 struct cx_tok *cx_tok_deinit(struct cx_tok *tok);
 
-bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out);
+bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup);
 bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out);
 bool cx_parse(struct cx *cx, FILE *in, struct cx_vec *out);
 

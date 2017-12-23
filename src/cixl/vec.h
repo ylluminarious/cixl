@@ -18,7 +18,7 @@
 
 struct cx_vec {
   size_t count, capac, item_size;
-  char *items;
+  unsigned char *items;
 };
 
 struct cx_vec *cx_vec_init(struct cx_vec *vec, size_t item_size);

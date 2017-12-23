@@ -56,8 +56,8 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   int row = cx->row, col = cx->col;
   
-  if (!cx_parse_tok(cx, in, &eval->toks)) {
-    cx_error(cx, row, col, "Malformed let");
+  if (!cx_parse_tok(cx, in, &eval->toks, false)) {
+    cx_error(cx, row, col, "Missing let id");
     free(cx_macro_eval_deinit(eval));
     return false;
   }
@@ -65,7 +65,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_tok *id = cx_vec_peek(&eval->toks);
 
   if (id->type != CX_TID) {
-    cx_error(cx, row, col, "Invalid id");
+    cx_error(cx, row, col, "Invalid let id");
     free(cx_macro_eval_deinit(eval));
     return false;
   }
@@ -80,18 +80,105 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
   return true;
 }
 
+static ssize_t func_eval(struct cx_macro_eval *eval,
+			 struct cx *cx,
+			 struct cx_vec *toks,
+			 ssize_t i) {
+  struct cx_scope *ps = cx_scope(cx);
+  struct cx_scope *s = cx_begin(cx, false);
+
+  for (int j = eval->toks.count-1; j >= 0; j--) {
+    struct cx_tok *t = cx_vec_get(&eval->toks, j);
+    *cx_set(s, t->data) = *cx_pop(ps, false);
+  }
+  
+  return i+1;
+}
+
+static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
+  struct cx_vec toks;
+  cx_vec_init(&toks, sizeof(struct cx_tok));
+
+  int row = cx->row, col = cx->col;
+  
+  if (!cx_parse_tok(cx, in, &toks, false)) {
+    cx_error(cx, row, col, "Missing func id");
+    cx_vec_deinit(&toks);
+    return false;
+  }
+
+  struct cx_tok id = *(struct cx_tok *)cx_vec_pop(&toks);
+
+  if (id.type != CX_TID) {
+    cx_error(cx, row, col, "Invalid func id");
+    cx_tok_deinit(&id);
+    cx_vec_deinit(&toks);
+    return false;
+  }
+
+  if (!cx_parse_tok(cx, in, &toks, false)) {
+    cx_error(cx, row, col, "Missing func args");
+    cx_tok_deinit(&id);
+    cx_vec_deinit(&toks);
+    return false;
+  }
+
+  struct cx_tok args = *(struct cx_tok *)cx_vec_pop(&toks);
+
+  if (args.type != CX_TGROUP) {
+    cx_error(cx, row, col, "Invalid func args");
+    cx_tok_deinit(&id);
+    cx_tok_deinit(&args);
+    cx_vec_deinit(&toks);
+    return false;
+  }
+  
+  struct cx_macro_eval *eval =
+    cx_macro_eval_init(malloc(sizeof(struct cx_macro_eval)), func_eval);
+  cx_tok_init(cx_vec_push(&toks), CX_TMACRO, eval, row, col);
+  
+  struct cx_vec func_args;
+  cx_vec_init(&func_args, sizeof(struct cx_func_arg));
+
+  if (!cx_eval_args(cx, args.data, &eval->toks, &func_args)) {
+    cx_tok_deinit(&id);
+    cx_tok_deinit(&args);
+    cx_vec_deinit(&toks);
+    cx_vec_deinit(&func_args);
+    return false;  
+  }
+
+  cx_tok_deinit(&args);
+
+  if (!cx_parse_end(cx, in, &toks)) {
+    cx_tok_deinit(&id);
+    cx_vec_deinit(&toks);
+    cx_vec_deinit(&func_args);
+    return false;
+  }
+
+  _cx_add_func(cx,
+	       id.data,
+	       func_args.count,
+	       (void *)func_args.items)->toks = toks;
+
+  cx_tok_deinit(&id);
+  cx_vec_deinit(&func_args);
+  return true;
+}
+
 static void dup_imp(struct cx_scope *scope) {
   struct cx_box *vp = cx_ok(cx_peek(scope, false));
   struct cx_box v = *vp;
   cx_box_copy(cx_push(scope), &v);
 }
 
-static void drop_imp(struct cx_scope *scope) {
+static void zap_imp(struct cx_scope *scope) {
   cx_box_deinit(cx_ok(cx_pop(scope, false)));
 }
 
-static void reset_imp(struct cx_scope *scope) {
-  cx_reset(scope);
+static void cls_imp(struct cx_scope *scope) {
+  cx_vec_clear(&scope->stack);
 }
 
 static void call_imp(struct cx_scope *scope) {
@@ -118,7 +205,9 @@ struct cx *cx_init(struct cx *cx) {
   
   cx_set_init(&cx->macros, sizeof(struct cx_macro *), cx_cmp_str);
   cx->macros.key = get_macro_id;
+
   cx_add_macro(cx, "let:", let_parse);
+  cx_add_macro(cx, "func:", func_parse);
 
   cx_set_init(&cx->funcs, sizeof(struct cx_func *), cx_cmp_str);
   cx->funcs.key = get_func_id;
@@ -130,9 +219,9 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_int_type(cx);
   cx_add_lambda_type(cx);
   
-  cx_add_func(cx, "@", cx_arg(cx->any_type))->ptr = dup_imp;
-  cx_add_func(cx, "_", cx_arg(cx->any_type))->ptr = drop_imp;
-  cx_add_func(cx, "!")->ptr = reset_imp;
+  cx_add_func(cx, "dup", cx_arg(cx->any_type))->ptr = dup_imp;
+  cx_add_func(cx, "zap", cx_arg(cx->any_type))->ptr = zap_imp;
+  cx_add_func(cx, "cls")->ptr = cls_imp;
 
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
@@ -218,7 +307,7 @@ struct cx_func_imp *_cx_add_func(struct cx *cx,
     }
   } else {
     f = cx_set_insert(&cx->funcs, &id);
-    *f = cx_func_init(malloc(sizeof(struct cx_func)), strdup(id), nargs);
+    *f = cx_func_init(malloc(sizeof(struct cx_func)), id, nargs);
   }
   
   return cx_func_add_imp(*f, nargs, args);
