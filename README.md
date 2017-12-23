@@ -3,7 +3,7 @@
 ## cixl
 #### a C-powered, minimalistic extension language
 
-This project aims to produce a minimalistic extension language, or DSL substrate; in C. In a way, it's Lua taken one step further. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on transparency, flexibility and simplicity.
+This project aims to produce a minimalistic extension language, or DSL substrate; in C. In a way, it's Lua taken one step further down the path of simplicity. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on transparency and flexibility.
 
 ### REPL
 A primitive REPL is included, the executable weighs in at 200k without dependencies.
