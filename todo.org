@@ -1,12 +1,13 @@
-* add ? func
-** > 0 for int
-* add test functions from mixl
+* add () group support
 * add func: macro
+* add Vec type
+** add stash/splat funcs
+** add [] support
+* add Rat type
+* add {} lambda support
 * add str support
 ** dup on box copy
 ** add ? func (!= 0)
-* add () scope support
-* add Rat type
 * jit func tokens to imps
 * add coroutines
 ** https://www.chiark.greenend.org.uk/~sgtatham/coroutines.html

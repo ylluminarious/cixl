@@ -47,6 +47,7 @@ static bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
   
   while (true) {
     char c = fgetc(in);
+    if (c == EOF) { goto exit; }
 
     if (cx_is_separator(cx, c)) {
       ok = ungetc(c, in) != EOF;
@@ -96,9 +97,10 @@ static bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
   
   while (true) {
     char c = fgetc(in);
-    
+    if (c == EOF) { goto exit; }
+      
     if (!isdigit(c)) {
-      ok = ungetc(c, in) != EOF;
+      ok = (ungetc(c, in) != EOF);
       goto exit;
     }
     
@@ -148,6 +150,7 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out) {
       switch (c) {
       case EOF:
 	done = true;
+	break;
       case ' ':
 	cx->col++;
 	break;

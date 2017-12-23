@@ -93,6 +93,15 @@ static void reset_imp(struct cx_scope *scope) {
   cx_reset(scope);
 }
 
+static void test_imp(struct cx_scope *scope) {
+  struct cx_box x = *cx_ok(cx_pop(scope, false));
+  
+  if (!x.as_bool) {
+    struct cx *cx = scope->cx;
+    cx_error(cx, cx->row, cx->col, "Test failed");
+  }
+}
+
 struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
   cx_add_separators(cx, " \t\n;(){}[]");
@@ -116,6 +125,8 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "@", cx_arg(cx->any_type))->ptr = dup_imp;
   cx_add_func(cx, "_", cx_arg(cx->any_type))->ptr = drop_imp;
   cx_add_func(cx, "!")->ptr = reset_imp;
+
+  cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx->main = cx_begin(cx, false);
@@ -254,11 +265,4 @@ void cx_end(struct cx *cx) {
 struct cx_scope *cx_scope(struct cx *cx) {
   cx_ok(cx->scopes.count);
   return *(struct cx_scope **)cx_vec_get(&cx->scopes, cx->scopes.count-1);
-}
-
-void cx_tests() {
-  struct cx cx;
-  cx_init(&cx);
-  cx_ok(cx_get_type(&cx, "Int", true));
-  cx_deinit(&cx);
 }

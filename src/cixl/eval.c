@@ -91,15 +91,17 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   case CX_TMACRO:
     return cx_eval_macro(cx, toks, i);
   default:
-    cx_error(cx, t->row, t->col, "Unexpected token: %d", t->type);
+    break;
   }
 
+  cx_error(cx, t->row, t->col, "Unexpected token: %d", t->type);
   return -1;
 }
 
 bool cx_eval(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   while (i < toks->count) {
     if ((i = cx_eval_tok(cx, toks, i)) == -1) { return false; }
+    if (cx->errors.count) { return false; }
   }
   
   return true;

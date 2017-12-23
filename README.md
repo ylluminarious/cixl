@@ -36,6 +36,10 @@ Press Return twice to eval input.
 ..
 [6 1 2]
 
+> + +
+..
+[9]
+
 > let: foo 42;
 ..
 []

@@ -54,6 +54,4 @@ struct cx_scope *cx_begin(struct cx *cx, bool child);
 void cx_end(struct cx *cx);
 struct cx_scope *cx_scope(struct cx *cx);
 
-void cx_tests();
-
 #endif

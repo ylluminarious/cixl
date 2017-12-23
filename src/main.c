@@ -1,6 +1,6 @@
-#include "cixl/cx.h"
 #include "cixl/repl.h"
 #include "cixl/set.h"
+#include "cixl/tests.h"
 #include "cixl/vec.h"
 
 int main() {

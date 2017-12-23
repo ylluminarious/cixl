@@ -16,19 +16,23 @@ static void ok_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = x.as_int != 0;
 }
 
+static void eq_imp(struct cx_scope *scope) {
+  struct cx_box y = *cx_ok(cx_pop(scope, false)), x = *cx_ok(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = x.as_int == y.as_int;
+}
+
 static void add_imp(struct cx_scope *scope) {
   struct cx_box y = *cx_ok(cx_pop(scope, false)), x = *cx_ok(cx_pop(scope, false));
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int + y.as_int;
 }
 
 void cx_add_int_type(struct cx *cx) {
-  cx->int_type = cx_add_type(cx, "Int", cx->any_type, NULL);
-  cx->int_type->fprint = fprint;
+  struct cx_type *t = cx_add_type(cx, "Int", cx->any_type, NULL);
+  t->fprint = fprint;
 
-  cx_add_func(cx, "?", cx_arg(cx->int_type))->ptr = ok_imp;
+  cx_add_func(cx, "?", cx_arg(t))->ptr = ok_imp;
+  cx_add_func(cx, "=", cx_arg(t), cx_arg(t))->ptr = eq_imp;
+  cx_add_func(cx, "+", cx_arg(t), cx_arg(t))->ptr = add_imp;
 
-  cx_add_func(cx, "+",
-	      cx_arg(cx->int_type),
-	      cx_arg(cx->int_type))->ptr = add_imp;
-
+  cx->int_type = t;
 }
