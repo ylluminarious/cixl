@@ -15,7 +15,7 @@ Press Return twice to eval input.
 > quit
 ```
 
-This project aims to produce a minimalistic extension language, or language substrate; in C + GNU-extensions. In a way, it's Lua taken one step further. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on transparency, flexibility and simplicity.
+This project aims to produce a minimalistic extension language, or language substrate; in C. In a way, it's Lua taken one step further. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on transparency, flexibility and simplicity.
 
 ### Stack
 The parameter stack is exposed to user code, just like in Forth.
@@ -29,17 +29,13 @@ The parameter stack is exposed to user code, just like in Forth.
 ..
 [1 2 3 4 5]
 
-> (6 7 8)
-..
-[1 2 3 4 5 8]
-
 > cls
 ..
 []
 ```
 
 ### Math
-But unlike Forth, functions scan forward until enough arguments are on the stack.
+But unlike Forth, functions scan forward until enough arguments are on the stack to allow reordering parameters and operations to fit the problem being solved.
 
 ```
 > 1 + 2
