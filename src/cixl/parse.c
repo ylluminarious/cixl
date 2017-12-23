@@ -9,6 +9,7 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/int.h"
+#include "cixl/lambda.h"
 #include "cixl/parse.h"
 #include "cixl/vec.h"
 
@@ -45,7 +46,7 @@ struct cx_tok *cx_tok_deinit(struct cx_tok *tok) {
   return tok;
 }
 
-static bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
+bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_buf id;
   cx_buf_open(&id);
   bool ok = true;
@@ -95,7 +96,7 @@ static bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
+bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
   struct cx_buf value;
   cx_buf_open(&value);
   int col = cx->col;
@@ -122,8 +123,7 @@ static bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
       free(value.data);
       
       if (int_value || !errno) {
-	struct cx_box *box = cx_box_init(malloc(sizeof(struct cx_box)),
-					 cx->int_type);
+	struct cx_box *box = cx_box_init(malloc(sizeof(struct cx_box)), cx->int_type);
 	box->as_int = int_value;
 	
 	cx_tok_init(cx_vec_push(out),
@@ -142,7 +142,7 @@ static bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
-static bool cx_parse_group(struct cx *cx, FILE *in, struct cx_vec *out) {
+bool cx_parse_group(struct cx *cx, FILE *in, struct cx_vec *out) {
   int row = cx->row, col = cx->col;
   struct cx_vec *body = cx_vec_init(malloc(sizeof(struct cx_vec)),
 				    sizeof(struct cx_tok));
@@ -161,6 +161,29 @@ static bool cx_parse_group(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 
   cx_tok_init(cx_vec_push(out), CX_TGROUP, body, row, col);
+  return true;
+}
+
+bool cx_parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out) {
+  int row = cx->row, col = cx->col;
+  struct cx_lambda *lambda = cx_lambda_init(malloc(sizeof(struct cx_lambda)));
+  
+    while (true) {
+    if (!cx_parse_tok(cx, in, &lambda->body)) {
+      free(cx_lambda_deinit(lambda));
+      return false;
+    }
+
+    struct cx_tok *tok = cx_vec_peek(&lambda->body);
+    if (tok->type == CX_TUNLAMBDA) {
+      cx_tok_deinit(cx_vec_pop(&lambda->body));
+      break;
+    }
+  }
+
+  struct cx_box *box = cx_box_init(malloc(sizeof(struct cx_box)), cx->lambda_type);
+  box->as_lambda = lambda;
+  cx_tok_init(cx_vec_push(out), CX_TLITERAL, box, row, col);
   return true;
 }
 
@@ -192,6 +215,11 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out) {
 	return cx_parse_group(cx, in, out);
       case ')':
 	cx_tok_init(cx_vec_push(out), CX_TUNGROUP, NULL, row, col);
+	return true;	
+      case '{':
+	return cx_parse_lambda(cx, in, out);
+      case '}':
+	cx_tok_init(cx_vec_push(out), CX_TUNLAMBDA, NULL, row, col);
 	return true;	
       default:
 	if (isdigit(c)) {

@@ -7,8 +7,8 @@
 #include "cixl/int.h"
 #include "cixl/scope.h"
 
-static void fprint(struct cx_type *type, struct cx_box *box, FILE *out) {
-  fprintf(out, "%" PRId64, box->as_int);
+static void fprint(struct cx_box *value, FILE *out) {
+  fprintf(out, "%" PRId64, value->as_int);
 }
 
 static void ok_imp(struct cx_scope *scope) {

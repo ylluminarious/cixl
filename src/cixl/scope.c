@@ -59,7 +59,7 @@ void cx_fprint_stack(struct cx_scope *scope, FILE *out) {
   
   cx_do_vec(&scope->stack, struct cx_box, b) {
     if (sep) { fputc(sep, out); }
-    cx_fprint_value(b, out);
+    cx_box_fprint(b, out);
     sep = ' ';
   }
 

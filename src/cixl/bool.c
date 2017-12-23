@@ -5,8 +5,8 @@
 #include "cixl/func.h"
 #include "cixl/scope.h"
 
-static void fprint(struct cx_type *type, struct cx_box *box, FILE *out) {
-  fputs(box->as_bool ? "true" : "false", out);
+static void fprint(struct cx_box *value, FILE *out) {
+  fputs(value->as_bool ? "true" : "false", out);
 }
 
 static void true_imp(struct cx_scope *scope) {

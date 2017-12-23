@@ -51,6 +51,14 @@ Press Return twice to eval input.
 > $foo
 ..
 [42]
+
+> {1 2 3}
+..
+[Lambda(0x52d97d0:1)]
+
+> call
+..
+[1 2 3]
 ```
 
 ### License

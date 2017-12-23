@@ -3,7 +3,6 @@
 ** add stash/splat funcs
 ** add [] support
 * add Rat type
-* add {} lambda support
 * add str support
 ** dup on box copy
 ** add ? func (!= 0)

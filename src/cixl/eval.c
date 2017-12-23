@@ -26,7 +26,7 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t i) {
       struct cx_scope *s = cx_scope(cx);
       struct cx_box *v = cx_get(s, id+1, false);
       if (!v) { return -1; }
-      cx_copy_value(cx_box_init(cx_push(s), v->type), v);
+      cx_box_copy(cx_push(s), v);
     } else {
       cx_error(cx, t->row, t->col, "Unknown id: '%s'", id);
       return -1;
@@ -38,7 +38,7 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t i) {
 
 ssize_t cx_eval_literal(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   struct cx_tok *t = cx_vec_get(toks, i);
-  cx_copy_value(cx_push(cx_scope(cx)), t->data);
+  cx_box_copy(cx_push(cx_scope(cx)), t->data);
   return i+1;
 }
 

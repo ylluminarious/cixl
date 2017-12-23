@@ -4,11 +4,17 @@
 #include "cixl/cx.h"
 #include "cixl/box.h"
 #include "cixl/error.h"
+#include "cixl/scope.h"
 #include "cixl/type.h"
+
+static void default_call(struct cx_box *value, struct cx_scope *scope) {
+  cx_box_copy(cx_push(scope), value);
+}
 
 struct cx_type *cx_type_init(struct cx_type *type, const char *id) {
   type->id = strdup(id);
   cx_set_init(&type->parents, sizeof(struct cx_type *), cx_cmp_ptr);
+  type->call = default_call;
   type->copy = NULL;
   type->fprint = NULL;
   type->deinit = NULL;
@@ -35,8 +41,8 @@ bool cx_isa(struct cx_type *type, struct cx_type *parent) {
   return false;
 }
 
-static void fprint(struct cx_type *type, struct cx_box *box, FILE *out) {
-  fprintf(out, "Type(%s)", box->as_type->id);
+static void fprint(struct cx_box *value, FILE *out) {
+  fprintf(out, "Type(%s)", value->as_type->id);
 }
 
 void cx_add_meta_type(struct cx *cx) {

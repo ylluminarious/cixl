@@ -9,6 +9,7 @@
 #include "cixl/eval.h"
 #include "cixl/func.h"
 #include "cixl/int.h"
+#include "cixl/lambda.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/type.h"
@@ -82,15 +83,21 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 static void dup_imp(struct cx_scope *scope) {
   struct cx_box *vp = cx_ok(cx_peek(scope, false));
   struct cx_box v = *vp;
-  cx_copy_value(cx_box_init(cx_push(scope), v.type), &v);
+  cx_box_copy(cx_push(scope), &v);
 }
 
 static void drop_imp(struct cx_scope *scope) {
-  cx_ok(cx_pop(scope, false));
+  cx_box_deinit(cx_ok(cx_pop(scope, false)));
 }
 
 static void reset_imp(struct cx_scope *scope) {
   cx_reset(scope);
+}
+
+static void call_imp(struct cx_scope *scope) {
+  struct cx_box x = *cx_ok(cx_pop(scope, false));
+  cx_box_call(&x, scope);
+  cx_box_deinit(&x);
 }
 
 static void test_imp(struct cx_scope *scope) {
@@ -118,14 +125,16 @@ struct cx *cx_init(struct cx *cx) {
   
   cx->any_type = cx_add_type(cx, "Any", NULL);
 
+  cx_add_meta_type(cx);
   cx_add_bool_type(cx);
   cx_add_int_type(cx);
-  cx_add_meta_type(cx);
+  cx_add_lambda_type(cx);
   
   cx_add_func(cx, "@", cx_arg(cx->any_type))->ptr = dup_imp;
   cx_add_func(cx, "_", cx_arg(cx->any_type))->ptr = drop_imp;
   cx_add_func(cx, "!")->ptr = reset_imp;
 
+  cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
