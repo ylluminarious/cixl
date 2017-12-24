@@ -2,14 +2,23 @@
 ** lookup types on parse
 ** change CX_ID where used as type
 * add if fn
+* add &id support in parse/eval
+** push func
+*** add func_type
+**** copy 
+**** move call fn
+* move yield to coro.c
 * add Vec type
 ** add [] support
 ** add nrefs to Vec type like lambda
+** add push fn
 * add stash/splat funcs
 * add Rat type
 * add str support
 ** dup on box copy
 ** add ? func (!= 0)
+* add Opt support
+** add Vec pop fn
 * add parse/eval
 * jit func tokens to imps
 ** add CX_TFUNC_IMP
