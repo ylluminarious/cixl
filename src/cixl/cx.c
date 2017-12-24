@@ -62,7 +62,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
 
-  struct cx_tok *id = cx_vec_peek(&eval->toks);
+  struct cx_tok *id = cx_vec_peek(&eval->toks, 0);
 
   if (id->type != CX_TID) {
     cx_error(cx, row, col, "Invalid let id");
@@ -84,8 +84,8 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
 			 struct cx *cx,
 			 struct cx_vec *toks,
 			 ssize_t pc) {
-  struct cx_scope *ps = cx_scope(cx);
-  struct cx_scope *s = cx_begin(cx, false);
+  struct cx_scope *s = cx_scope(cx, 0);
+  struct cx_scope *ps = cx_scope(cx, 1);
 
   for (int j = eval->toks.count-1; j >= 0; j--) {
     struct cx_tok *t = cx_vec_get(&eval->toks, j);
@@ -188,9 +188,9 @@ static void call_imp(struct cx_scope *scope) {
 
 static void test_imp(struct cx_scope *scope) {
   struct cx_box x = *cx_ok(cx_pop(scope, false));
+  struct cx *cx = scope->cx;
   
-  if (!x.as_bool) {
-    struct cx *cx = scope->cx;
+  if (x.type != cx->bool_type || !x.as_bool) {
     cx_error(cx, cx->row, cx->col, "Test failed");
   }
 }
@@ -347,8 +347,8 @@ struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent) {
   return m ? *m : NULL;
 }
 
-struct cx_scope *cx_scope(struct cx *cx) {
-  return *(struct cx_scope **)cx_vec_peek(&cx->scopes);
+struct cx_scope *cx_scope(struct cx *cx, size_t i) {
+  return *(struct cx_scope **)cx_vec_peek(&cx->scopes, i);
 }
 
 void cx_push_scope(struct cx *cx, struct cx_scope *scope) {
@@ -365,7 +365,7 @@ struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
 
   if (s->stack.count) {
     struct cx_box *v = cx_vec_pop(&s->stack);
-    *cx_push(cx_scope(cx)) = *v;   
+    *cx_push(cx_scope(cx, 0)) = *v;   
   }
 
   return s;
@@ -375,7 +375,7 @@ struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
 struct cx_scope *cx_begin(struct cx *cx, bool child) {
   struct cx_scope *s = cx_scope_init(malloc(sizeof(struct cx_scope)),
 				     cx,
-				     child ? cx_scope(cx) : NULL);
+				     child ? cx_scope(cx, 0) : NULL);
   cx_push_scope(cx, s);
   return s;
 }

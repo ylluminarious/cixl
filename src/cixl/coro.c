@@ -29,7 +29,7 @@ static void yield_imp(struct cx_scope *scope) {
     scope = cx_pop_scope(cx, false);
     if (!scope) { return; }
     scope->coro = cx_coro_init(malloc(sizeof(struct cx_coro)), scope);
-    cx_box_init(cx_push(cx_scope(cx)), cx->coro_type)->as_coro = scope->coro;
+    cx_box_init(cx_push(cx_scope(cx, 0)), cx->coro_type)->as_coro = scope->coro;
   }
   
   cx->stop_pc = cx->pc+1;

@@ -1,7 +1,7 @@
 * change cx_scope to use ref counting
 ** add nrefs
-*** inc for parent scopes
-*** dec on deinit
+*** inc for child scopes
+*** dec instead of deinit
 
 * change lambda init/deinit to new/ref/unref
 * change coro init/deinit to new/ref/unref

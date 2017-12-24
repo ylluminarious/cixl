@@ -18,12 +18,12 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   if (isupper(id[0])) {
     struct cx_type *type = cx_get_type(cx, id, false);
     if (!type) { return -1; }
-    struct cx_box *box = cx_push(cx_scope(cx));
+    struct cx_box *box = cx_push(cx_scope(cx, 0));
     box->type = cx->meta_type;
     box->as_type = type;
   } else {
     if (id[0] == '$') {
-      struct cx_scope *s = cx_scope(cx);
+      struct cx_scope *s = cx_scope(cx, 0);
       struct cx_box *v = cx_get(s, id+1, false);
       if (!v) { return -1; }
       cx_box_copy(cx_push(s), v);
@@ -38,7 +38,7 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
 
 ssize_t cx_eval_literal(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   struct cx_tok *t = cx_vec_get(toks, pc);
-  cx_box_copy(cx_push(cx_scope(cx)), t->data);
+  cx_box_copy(cx_push(cx_scope(cx, 0)), t->data);
   return pc+1;
 }
 
@@ -53,11 +53,11 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   struct cx_func *func = t->data;
   int row = cx->row, col = cx->col;
   
-  while (pc < toks->count && cx_scope(cx)->stack.count < func->nargs) {
+  while (pc < toks->count && cx_scope(cx, 0)->stack.count < func->nargs) {
     if ((pc = cx_eval_tok(cx, toks, pc)) == -1) { return -1; }
   }
 
-  struct cx_scope *scope = cx_scope(cx);
+  struct cx_scope *scope = cx_scope(cx, 0);
 
   if (scope->stack.count < func->nargs) {
     cx_error(cx, row, col, "Not enough args for func: '%s'", func->id);
@@ -74,8 +74,9 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   if (imp->ptr) {
     imp->ptr(scope);
   } else {
+    struct cx_scope *s = cx_begin(cx, false);
     if (!cx_eval(cx, &imp->toks, 0)) { return -1; }
-    if (cx_scope(cx) != scope) { cx_end(cx); }
+    if (cx_scope(cx, 0) == s) { cx_end(cx); }
   }
   
   return pc;
@@ -86,7 +87,7 @@ ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   struct cx_vec *body = t->data;
   struct cx_scope *s = cx_begin(cx, true);
   if (!cx_eval(cx, body, 0)) { return -1; }
-  if (cx_scope(cx) == s) { cx_end(cx); }
+  if (cx_scope(cx, 0) == s) { cx_end(cx); }
   return pc+1;
 }
 
@@ -117,13 +118,15 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
 
 bool cx_eval(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   cx->pc = pc;
-
-  struct cx_scope *scope = cx_scope(cx);
-  cx_do_vec(&scope->toks, struct cx_tok, t) { cx_tok_deinit(t); }
-  cx_vec_clear(&scope->toks);
+  struct cx_scope *scope = cx_scope(cx, 0);
   
-  cx_do_vec(toks, struct cx_tok, t) {
-    cx_tok_copy(cx_vec_push(&scope->toks), t);
+  if (toks != &scope->toks) {
+    cx_do_vec(&scope->toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_clear(&scope->toks);
+  
+    cx_do_vec(toks, struct cx_tok, t) {
+      cx_tok_copy(cx_vec_push(&scope->toks), t);
+    }
   }
 
   while (cx->pc < toks->count && cx->pc != cx->stop_pc) {
@@ -131,6 +134,7 @@ bool cx_eval(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
     if (cx->errors.count) { return false; }
   }
   
+  cx->stop_pc = -1;
   return true;
 }
 

@@ -53,7 +53,7 @@ struct cx_func_imp *_cx_add_func(struct cx *cx,
 
 struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
 
-struct cx_scope *cx_scope(struct cx *cx);
+struct cx_scope *cx_scope(struct cx *cx, size_t i);
 void cx_push_scope(struct cx *cx, struct cx_scope *scope);
 struct cx_scope *cx_pop_scope(struct cx *cx, bool silent);
 struct cx_scope *cx_begin(struct cx *cx, bool child);

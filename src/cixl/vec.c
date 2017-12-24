@@ -37,9 +37,9 @@ void *cx_vec_push(struct cx_vec *vec) {
   return cx_vec_get(vec, vec->count++);
 }
 
-void *cx_vec_peek(struct cx_vec *vec) {
-  cx_ok(vec->count);
-  return cx_vec_get(vec, vec->count-1);
+void *cx_vec_peek(struct cx_vec *vec, size_t i) {
+  cx_ok(vec->count > i);
+  return cx_vec_get(vec, vec->count-i-1);
 }
 
 void *cx_vec_pop(struct cx_vec *vec) {

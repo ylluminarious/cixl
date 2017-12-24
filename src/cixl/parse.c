@@ -122,7 +122,7 @@ bool cx_parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       return false;
     }
 
-    struct cx_tok *tok = cx_vec_peek(body);
+    struct cx_tok *tok = cx_vec_peek(body, 0);
     if (tok->type == CX_TUNGROUP) {
       cx_tok_deinit(cx_vec_pop(body));
       break;
@@ -143,7 +143,7 @@ bool cx_parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       return false;
     }
 
-    struct cx_tok *tok = cx_vec_peek(&lambda->body);
+    struct cx_tok *tok = cx_vec_peek(&lambda->body, 0);
     if (tok->type == CX_TUNLAMBDA) {
       cx_tok_deinit(cx_vec_pop(&lambda->body));
       break;
@@ -214,7 +214,7 @@ bool cx_parse_end(struct cx *cx, FILE *in, struct cx_vec *out) {
   
   while (depth) {
     if (!cx_parse_tok(cx, in, out, true)) { return false; }
-    struct cx_tok *tok = cx_vec_peek(out);
+    struct cx_tok *tok = cx_vec_peek(out, 0);
 
     switch(tok->type) {
     case CX_TID: {

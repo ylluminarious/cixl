@@ -54,7 +54,7 @@ struct cx_box *cx_peek(struct cx_scope *scope, bool silent) {
     cx_error(scope->cx, scope->cx->row, scope->cx->col, "Stack is empty");
   }
 
-  return cx_vec_peek(&scope->stack);
+  return cx_vec_peek(&scope->stack, 0);
 }
 
 void cx_fprint_stack(struct cx_scope *scope, FILE *out) {

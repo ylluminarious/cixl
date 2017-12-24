@@ -30,7 +30,7 @@ void cx_repl(FILE *in, FILE *out) {
       cx_buf_close(&body);
 
       if (cx_eval_str(&cx, body.data)) {
-	cx_fprint_stack(cx_scope(&cx), out);
+	cx_fprint_stack(cx_scope(&cx, 0), out);
       } else {
 	cx_do_vec(&cx.errors, struct cx_error, e) {
 	  fprintf(out, "Error in row %d, col %d:\n%s\n", e->row, e->col, e->msg);

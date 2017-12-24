@@ -26,7 +26,7 @@ struct cx_vec *cx_vec_deinit(struct cx_vec *vec);
 void cx_vec_grow(struct cx_vec *vec, size_t capac);
 void *cx_vec_get(struct cx_vec *vec, size_t i);
 void *cx_vec_push(struct cx_vec *vec);
-void *cx_vec_peek(struct cx_vec *vec);
+void *cx_vec_peek(struct cx_vec *vec, size_t i);
 void *cx_vec_pop(struct cx_vec *vec);
 void *cx_vec_insert(struct cx_vec *vec, size_t i);
 void cx_vec_delete(struct cx_vec *vec, size_t i);
