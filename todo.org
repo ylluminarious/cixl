@@ -8,6 +8,13 @@
 **** copy 
 **** move call fn
 * move yield to coro.c
+* change cx_scope to use ref counting
+** add nrefs
+*** inc for parent scopes
+*** dec on deinit
+* add recall
+** forced tail call
+** fib
 * add Vec type
 ** add [] support
 ** add nrefs to Vec type like lambda
