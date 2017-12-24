@@ -6,12 +6,13 @@
 This project aims to produce a minimalistic extension language, or DSL substrate; in C. In a way, it's Lua taken one step further down the path of simplicity. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on transparency and flexibility.
 
 ### Getting Started
-To get started, you'll need a decent C compiler and CMake installed. A primitive REPL is included, the executable weighs in at 200k. It's highly recommended to run the REPL through ```rlwrap```.
+To get started, you'll need a decent C compiler and CMake installed. A primitive REPL is included, the executable weighs in at 200k. It's highly recommended to run the REPL through ```rlwrap``` for a less nerve-wrecking editing experience.
 
 ```
 git clone https://github.com/basic-gongfu/cixl.git
 cd cixl
 mkdir build
+cd build
 cmake ..
 rlwrap ./cixl
 
