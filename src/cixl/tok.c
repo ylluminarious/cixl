@@ -30,7 +30,7 @@ struct cx_tok *cx_tok_deinit(struct cx_tok *tok) {
     if (tok->data) { free(tok->data); }
     break;
   case CX_TMACRO:
-    free(cx_macro_eval_deinit(tok->data));
+    cx_macro_eval_unref(tok->data);
     break;
   default:
     break;
@@ -50,7 +50,8 @@ void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src) {
     cx_do_vec((struct cx_vec *)src->data, struct cx_tok, t) {
       cx_tok_copy(cx_vec_push(body), t);
     }
-    
+
+    dst->data = body;
     break;
   }
   case CX_TID:
@@ -58,6 +59,9 @@ void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src) {
     break;
   case CX_TLITERAL:
     dst->data = cx_box_copy(malloc(sizeof(struct cx_box)), src->data);
+    break;
+  case CX_TMACRO:
+    dst->data = cx_macro_eval_ref(src->data);
     break;
   default:
     dst->data = src->data;

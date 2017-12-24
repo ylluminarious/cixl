@@ -14,6 +14,7 @@ struct cx_scope {
   struct cx_coro *coro;
   struct cx_vec stack;
   struct cx_set env;
+  struct cx_vec toks;
 };
 
 struct cx_scope *cx_scope_init(struct cx_scope *scope,

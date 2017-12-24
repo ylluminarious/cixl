@@ -17,15 +17,25 @@ struct cx_macro *cx_macro_deinit(struct cx_macro *macro) {
   return macro;
 }
 
-struct cx_macro_eval *cx_macro_eval_init(struct cx_macro_eval *eval,
-					 cx_macro_eval_t imp) {
+struct cx_macro_eval *cx_macro_eval_new(cx_macro_eval_t imp) {
+  struct cx_macro_eval *eval = malloc(sizeof(struct cx_macro_eval));
   cx_vec_init(&eval->toks, sizeof(struct cx_tok));
   eval->imp = imp;
+  eval->nrefs = 1;
   return eval;
 }
 
-struct cx_macro_eval *cx_macro_eval_deinit(struct cx_macro_eval *eval) {
-  cx_do_vec(&eval->toks, struct cx_tok, t) { cx_tok_deinit(t); }
-  cx_vec_deinit(&eval->toks);
+struct cx_macro_eval *cx_macro_eval_ref(struct cx_macro_eval *eval) {
+  eval->nrefs++;
   return eval;
+}
+
+void cx_macro_eval_unref(struct cx_macro_eval *eval) {
+  eval->nrefs--;
+
+  if (!eval->nrefs) {
+    cx_do_vec(&eval->toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&eval->toks);
+    free(eval);
+  }
 }

@@ -3,6 +3,7 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/scope.h"
+#include "cixl/tok.h"
 #include "cixl/var.h"
 
 struct cx_scope *cx_scope_init(struct cx_scope *scope,
@@ -16,6 +17,8 @@ struct cx_scope *cx_scope_init(struct cx_scope *scope,
   cx_set_init(&scope->env, sizeof(struct cx_var), cx_cmp_str);
   scope->env.key_offset = offsetof(struct cx_var, id);
 
+  cx_vec_init(&scope->toks, sizeof(struct cx_tok));
+  
   return scope;
 }
 
@@ -25,6 +28,9 @@ struct cx_scope *cx_scope_deinit(struct cx_scope *scope) {
 
   cx_do_set(&scope->env, struct cx_var, v) { cx_var_deinit(v); }
   cx_set_deinit(&scope->env);
+
+  cx_do_vec(&scope->toks, struct cx_tok, t) { cx_tok_deinit(t); }
+  cx_vec_deinit(&scope->toks);
 
   return scope;
 }

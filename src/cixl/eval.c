@@ -116,8 +116,15 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
 }
 
 bool cx_eval(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
-  cx->toks = toks;
   cx->pc = pc;
+
+  struct cx_scope *scope = cx_scope(cx);
+  cx_do_vec(&scope->toks, struct cx_tok, t) { cx_tok_deinit(t); }
+  cx_vec_clear(&scope->toks);
+  
+  cx_do_vec(toks, struct cx_tok, t) {
+    cx_tok_copy(cx_vec_push(&scope->toks), t);
+  }
 
   while (cx->pc < toks->count && cx->pc != cx->stop_pc) {
     if ((cx->pc = cx_eval_tok(cx, toks, cx->pc)) == -1) { return false; }

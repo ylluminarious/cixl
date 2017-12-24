@@ -1,13 +1,13 @@
-* move yield fn to coro.c
-* move coro.toks to scope
-** clone cx->toks on scope creation
-** add coro.pc
-*** update instead of toks in capture
 * change cx_scope to use ref counting
 ** add nrefs
 *** inc for parent scopes
 *** dec on deinit
+
+* change lambda init/deinit to new/ref/unref
+* change coro init/deinit to new/ref/unref
+
 * goto/labels/lambda conv
+
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type

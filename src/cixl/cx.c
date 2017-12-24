@@ -52,14 +52,13 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
 }
 
 static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
-  struct cx_macro_eval *eval =
-    cx_macro_eval_init(malloc(sizeof(struct cx_macro_eval)), let_eval);
+  struct cx_macro_eval *eval = cx_macro_eval_new(let_eval);
 
   int row = cx->row, col = cx->col;
   
   if (!cx_parse_tok(cx, in, &eval->toks, false)) {
     cx_error(cx, row, col, "Missing let id");
-    free(cx_macro_eval_deinit(eval));
+    cx_macro_eval_unref(eval);
     return false;
   }
 
@@ -67,13 +66,13 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 
   if (id->type != CX_TID) {
     cx_error(cx, row, col, "Invalid let id");
-    free(cx_macro_eval_deinit(eval));
+    cx_macro_eval_unref(eval);
     return false;
   }
   
   if (!cx_parse_end(cx, in, &eval->toks)) {
     cx_error(cx, row, col, "Empty let");
-    free(cx_macro_eval_deinit(eval));
+    cx_macro_eval_unref(eval);
     return false;
   }
   
@@ -134,8 +133,7 @@ static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
     return false;
   }
   
-  struct cx_macro_eval *eval =
-    cx_macro_eval_init(malloc(sizeof(struct cx_macro_eval)), func_eval);
+  struct cx_macro_eval *eval = cx_macro_eval_new(func_eval);
   cx_tok_init(cx_vec_push(&toks), CX_TMACRO, eval, row, col);
   
   struct cx_vec func_args;
@@ -207,11 +205,14 @@ struct cx *cx_init(struct cx *cx) {
   cx_set_init(&cx->macros, sizeof(struct cx_macro *), cx_cmp_str);
   cx->macros.key = get_macro_id;
 
-  cx_add_macro(cx, "let:", let_parse);
-  cx_add_macro(cx, "func:", func_parse);
-
   cx_set_init(&cx->funcs, sizeof(struct cx_func *), cx_cmp_str);
   cx->funcs.key = get_func_id;
+
+  cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
+  cx_vec_init(&cx->errors, sizeof(struct cx_error));
+
+  cx_add_macro(cx, "let:", let_parse);
+  cx_add_macro(cx, "func:", func_parse);
   
   cx->any_type = cx_add_type(cx, "Any", NULL);
 
@@ -228,14 +229,9 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
-  cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
-  cx->main = cx_begin(cx, false);
-
-  cx->toks = NULL;
-  cx->pc = cx->stop_pc = -1;
-  
+  cx->pc = cx->stop_pc = -1;  
   cx->row = cx->col = -1;
-  cx_vec_init(&cx->errors, sizeof(struct cx_error));
+  cx->main = cx_begin(cx, false);
   return cx;
 }
 
