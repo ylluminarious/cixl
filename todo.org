@@ -12,6 +12,11 @@
 ** add nrefs
 *** inc for parent scopes
 *** dec on deinit
+* change cx_coro to copy entire tok seq
+** only update pc on yield
+** add scope.toks ptr
+*** copy ptr from cx on scope init
+*** copy toks on coro init and NULL ptr
 * add recall
 ** forced tail call
 ** fib
