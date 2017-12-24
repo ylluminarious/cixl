@@ -188,21 +188,6 @@ static void call_imp(struct cx_scope *scope) {
   cx_box_deinit(&x);
 }
 
-static void yield_imp(struct cx_scope *scope) {
-  struct cx *cx = scope->cx;
-  
-  if (scope->coro) {
-    cx_coro_yield(scope->coro);
-  } else {
-    scope = cx_pop_scope(cx, false);
-    if (!scope) { return; }
-    struct cx_coro *coro = cx_coro_init(malloc(sizeof(struct cx_coro)), scope);
-    cx_box_init(cx_push(cx_scope(cx)), cx->coro_type)->as_coro = coro;
-  }
-  
-  cx->stop_pc = cx->pc+1;
-}
-
 static void test_imp(struct cx_scope *scope) {
   struct cx_box x = *cx_ok(cx_pop(scope, false));
   
@@ -241,7 +226,6 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "cls")->ptr = cls_imp;
 
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
-  cx_add_func(cx, "yield", cx_arg(cx->any_type))->ptr = yield_imp;
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));

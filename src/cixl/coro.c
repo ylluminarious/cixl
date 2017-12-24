@@ -3,6 +3,7 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
+#include "cixl/func.h"
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 
@@ -31,6 +32,21 @@ void cx_coro_yield(struct cx_coro *coro) {
   for (size_t i = cx->pc+1; i < cx->toks->count; i++) {
     cx_tok_copy(cx_vec_push(&coro->toks), cx_vec_get(cx->toks, i));
   }
+}
+
+static void yield_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
+  if (scope->coro) {
+    cx_coro_yield(scope->coro);
+  } else {
+    scope = cx_pop_scope(cx, false);
+    if (!scope) { return; }
+    struct cx_coro *coro = cx_coro_init(malloc(sizeof(struct cx_coro)), scope);
+    cx_box_init(cx_push(cx_scope(cx)), cx->coro_type)->as_coro = coro;
+  }
+  
+  cx->stop_pc = cx->pc+1;
 }
 
 static void call(struct cx_box *value, struct cx_scope *scope) {
@@ -68,5 +84,8 @@ struct cx_type *cx_init_coro_type(struct cx *cx) {
   t->call = call;
   t->copy = copy;
   t->deinit = deinit;
+
+  cx_add_func(cx, "yield")->ptr = yield_imp;
+
   return t;
 }

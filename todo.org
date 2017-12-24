@@ -1,25 +1,24 @@
-* add CX_TTYPE
-** lookup types on parse
-** change CX_ID where used as type
-* add if fn
-* add &id support in parse/eval
-** push func
-*** add func_type
-**** copy 
-**** move call fn
-* move yield to coro.c
+* move yield fn to coro.c
+* move coro.toks to scope
+** clone cx->toks on scope creation
+** add coro.pc
+*** update instead of toks in capture
 * change cx_scope to use ref counting
 ** add nrefs
 *** inc for parent scopes
 *** dec on deinit
-* change cx_coro to copy entire tok seq
-** only update pc on yield
-** add scope.toks ptr
-*** copy ptr from cx on scope init
-*** copy toks on coro init and NULL ptr
+* goto/labels/lambda conv
+* add CX_TTYPE
+** lookup types on parse
+** change CX_ID where used as type
+* add if fn
 * add recall
 ** forced tail call
 ** fib
+* add &id support in parse/eval
+** push func
+** add func_type
+** move call fn to func.c
 * add Vec type
 ** add [] support
 ** add nrefs to Vec type like lambda
@@ -29,7 +28,7 @@
 * add str support
 ** dup on box copy
 ** add ? func (!= 0)
-* add Opt support
+* add Opt type
 ** add Vec pop fn
 * add parse/eval
 * jit func tokens to imps

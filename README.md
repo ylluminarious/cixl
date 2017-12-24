@@ -6,7 +6,7 @@
 This project aims to produce a minimalistic extension language, or DSL substrate; in C. In a way, it's Lua taken one step further down the path of simplicity. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on transparency and flexibility.
 
 ### Getting Started
-To get started, you'll need a decent C compiler and CMake installed. A primitive REPL is included, the executable weighs in at 200k. It's highly recommended to run the REPL through ```rlwrap``` for a less nerve-wrecking editing experience.
+To get started, you'll need a decent C compiler with GNU-extensions and CMake installed. A primitive REPL is included, the executable weighs in at 200k. It's highly recommended to run the REPL through ```rlwrap``` for a less nerve-wrecking editing experience.
 
 ```
 git clone https://github.com/basic-gongfu/cixl.git
@@ -121,7 +121,8 @@ The ```func:``` macro may be used to define named functions. Several implementat
 ..
 [42]
 
-> func: baz(x y Int z 0) $x + $y + $z;
+> func: baz(x y Int z 0)
+    $x + $y + $z;
 ..cls
 ..baz 1 3 5
 ..
@@ -146,7 +147,9 @@ Coroutines allow stopping and resuming execution of a scope. The coroutine conte
 Error in row 1, col 5:
 Coro is done
 
-> func: foo() 1 2 yield 3; foo call
+> func: foo()
+..  1 2 yield 3;
+..foo call
 ..
 [2 3]
 ```
