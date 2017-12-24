@@ -5,10 +5,16 @@
 
 This project aims to produce a minimalistic extension language, or DSL substrate; in C. In a way, it's Lua taken one step further down the path of simplicity. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on transparency and flexibility.
 
-### REPL
-A primitive REPL is included, the executable weighs in at 200k.
+### Getting Started
+To get started, you'll need a decent C compiler and CMake installed. A primitive REPL is included, the executable weighs in at 200k. It's highly recommended to run the REPL through ```rlwrap```.
 
 ```
+git clone https://github.com/basic-gongfu/cixl.git
+cd cixl
+mkdir build
+cmake ..
+rlwrap ./cixl
+
 cixl v0.1
 
 Press Return twice to eval input.
@@ -138,6 +144,10 @@ Coroutines allow stopping and resuming execution of a scope. The coroutine conte
 ..
 Error in row 1, col 5:
 Coro is done
+
+> func: foo() 1 2 yield 3; foo call
+..
+[2 3]
 ```
 
 ### License

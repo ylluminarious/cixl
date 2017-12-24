@@ -75,7 +75,7 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
     imp->ptr(scope);
   } else {
     if (!cx_eval(cx, &imp->toks, 0)) { return -1; }
-    cx_end(cx);
+    if (cx_scope(cx) != scope) { cx_end(cx); }
   }
   
   return pc;

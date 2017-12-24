@@ -58,9 +58,21 @@ static void func_tests() {
   cx_deinit(&cx);
 }
 
+static void coro_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "(1 2 yield 3) call + 5 =");
+  run(&cx, "func: foo() 1 2 yield 3; foo call + 5 =");
+  run(&cx, "(let: x 42; yield $x) call 42 =");
+
+  cx_deinit(&cx);
+}
+
 void cx_tests() {
   stack_tests();
   group_tests();
   int_tests();
   func_tests();
+  coro_tests();
 }
