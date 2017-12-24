@@ -59,7 +59,7 @@ But unlike Forth, functions scan forward until enough arguments are on the stack
 ```
 
 ### Variables
-Named variables may be bound once per scope using the ```let:```-macro.
+Named variables may be bound once per scope using the ```let:``` macro.
 
 ```
 > let: foo 42;
@@ -85,7 +85,7 @@ Braces quote contained code, which is then pushed on the stack.
 ```
 
 ### Scopes
-Enclosing code in parens results in code being evaluated in a separate scope, the last value on the stack is automatically pushed on the parent stack on scope exit. The parent environment in reachable from within the scope, but variables set inside the scope are not visible from the outside.
+Enclosing code in parens evaluates in a separate scope. Variables in the parent scope may be referenced from within the scope, but variables defined inside are not visible from the outside. The last value on the stack is automatically returned on scope exit.
 
 ```
 > (1 2 3)
@@ -97,7 +97,7 @@ Enclosing code in parens results in code being evaluated in a separate scope, th
 ```
 
 ### Functions
-The ```func:```-macro may be used to define named functions. An integer may be specified instead of argument type, which is then substituted for the actual type on evaluation.
+The ```func:``` macro may be used to define named functions. An integer may be specified instead of argument type, which is then substituted for the actual type of that argument on evaluation.
 
 ```
 > func: foo() 42; foo
