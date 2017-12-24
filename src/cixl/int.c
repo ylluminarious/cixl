@@ -26,7 +26,7 @@ static void add_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int + y.as_int;
 }
 
-void cx_add_int_type(struct cx *cx) {
+struct cx_type *cx_init_int_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Int", cx->any_type, NULL);
   t->fprint = fprint;
 
@@ -34,5 +34,5 @@ void cx_add_int_type(struct cx *cx) {
   cx_add_func(cx, "=", cx_arg(t), cx_arg(t))->ptr = eq_imp;
   cx_add_func(cx, "+", cx_arg(t), cx_arg(t))->ptr = add_imp;
 
-  cx->int_type = t;
+  return t;
 }

@@ -92,26 +92,52 @@ Enclosing code in parens evaluates in a separate scope/stack. Variables in the p
 ..
 [3]
 
-> let: foo 1; (let: foo 2; $foo) $foo
+> let: foo 1;
+..(let: foo 2; $foo)
+..$foo
+..
 [2 1]
 ```
 
 ### Functions
-The ```func:``` macro may be used to define named functions. An integer may be specified instead of argument type, which is then substituted for the actual type of that argument on evaluation.
+The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same number of arguments and different types. An integer may be specified instead of argument type, which is then substituted for the actual type of that argument on evaluation. Each function opens an implicit scope that is closed on exit.
 
 ```
-> func: foo() 42; foo
+> func: foo() 42;
+..foo
 ..
 [42]
 
-> func: bar(x Int) $x + 35; cls bar 7
+> func: bar(x Int) $x + 35;
+..cls
+..bar 7
 ..
 [42]
 
-> func: baz(x y Int z 0) $x + $y + $z; cls baz 1 3 5
+> func: baz(x y Int z 0) $x + $y + $z;
+..cls
+..baz 1 3 5
 ..
 [9]
 
+```
+
+### Coroutines
+Coroutines allow stopping and resuming execution of a scope. The coroutine context is returned on first yield, and ```call```-ing it picks up the trail from previous ```yield```.
+
+```
+> (1 2 yield 3)
+..
+[2 Coro(0x53c9de0:1)]
+
+> dup call
+..
+[2 Coro(0x53c9de0:1) 3]
+
+> zap call
+..
+Error in row 1, col 5:
+Coro is done
 ```
 
 ### License

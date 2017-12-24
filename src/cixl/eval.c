@@ -11,8 +11,8 @@
 #include "cixl/scope.h"
 #include "cixl/vec.h"
 
-ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t i) {
-  struct cx_tok *t = cx_vec_get(toks, i);
+ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
+  struct cx_tok *t = cx_vec_get(toks, pc);
   char *id = t->data;
 
   if (isupper(id[0])) {
@@ -33,28 +33,28 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t i) {
     }
   }
   
-  return i+1;
+  return pc+1;
 }
 
-ssize_t cx_eval_literal(struct cx *cx, struct cx_vec *toks, ssize_t i) {
-  struct cx_tok *t = cx_vec_get(toks, i);
+ssize_t cx_eval_literal(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
+  struct cx_tok *t = cx_vec_get(toks, pc);
   cx_box_copy(cx_push(cx_scope(cx)), t->data);
-  return i+1;
+  return pc+1;
 }
 
-ssize_t cx_eval_macro(struct cx *cx, struct cx_vec *toks, ssize_t i) {
-  struct cx_tok *t = cx_vec_get(toks, i);
+ssize_t cx_eval_macro(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
+  struct cx_tok *t = cx_vec_get(toks, pc);
   struct cx_macro_eval *eval = t->data;
-  return eval->imp(eval, cx, toks, i);
+  return eval->imp(eval, cx, toks, pc);
 }
 
-ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t i) {
-  struct cx_tok *t = cx_vec_get(toks, i++);
+ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
+  struct cx_tok *t = cx_vec_get(toks, pc++);
   struct cx_func *func = t->data;
   int row = cx->row, col = cx->col;
   
-  while (i < toks->count && cx_scope(cx)->stack.count < func->nargs) {
-    if ((i = cx_eval_tok(cx, toks, i)) == -1) { return -1; }
+  while (pc < toks->count && cx_scope(cx)->stack.count < func->nargs) {
+    if ((pc = cx_eval_tok(cx, toks, pc)) == -1) { return -1; }
   }
 
   struct cx_scope *scope = cx_scope(cx);
@@ -78,35 +78,35 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t i) {
     cx_end(cx);
   }
   
-  return i;
+  return pc;
 }
 
-ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t i) {
-  struct cx_tok *t = cx_vec_get(toks, i);
+ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
+  struct cx_tok *t = cx_vec_get(toks, pc);
   struct cx_vec *body = t->data;
-  cx_begin(cx, true);
+  struct cx_scope *s = cx_begin(cx, true);
   if (!cx_eval(cx, body, 0)) { return -1; }
-  cx_end(cx);
-  return i+1;
+  if (cx_scope(cx) == s) { cx_end(cx); }
+  return pc+1;
 }
 
-ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t i) {
+ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   cx_ok(toks->count);
-  struct cx_tok *t = cx_vec_get(toks, i);
+  struct cx_tok *t = cx_vec_get(toks, pc);
   cx->row = t->row;
   cx->col = t->col;
   
   switch (t->type) {
   case CX_TFUNC:
-    return cx_eval_func(cx, toks, i);
+    return cx_eval_func(cx, toks, pc);
   case CX_TGROUP:
-    return cx_eval_group(cx, toks, i);
+    return cx_eval_group(cx, toks, pc);
   case CX_TID:
-    return cx_eval_id(cx, toks, i);
+    return cx_eval_id(cx, toks, pc);
   case CX_TLITERAL:
-    return cx_eval_literal(cx, toks, i);
+    return cx_eval_literal(cx, toks, pc);
   case CX_TMACRO:
-    return cx_eval_macro(cx, toks, i);
+    return cx_eval_macro(cx, toks, pc);
   default:
     break;
   }
@@ -115,9 +115,12 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t i) {
   return -1;
 }
 
-bool cx_eval(struct cx *cx, struct cx_vec *toks, ssize_t i) {
-  while (i < toks->count) {
-    if ((i = cx_eval_tok(cx, toks, i)) == -1) { return false; }
+bool cx_eval(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
+  cx->toks = toks;
+  cx->pc = pc;
+
+  while (cx->pc < toks->count && cx->pc != cx->stop_pc) {
+    if ((cx->pc = cx_eval_tok(cx, toks, cx->pc)) == -1) { return false; }
     if (cx->errors.count) { return false; }
   }
   

@@ -4,7 +4,7 @@
 #include "cixl/box.h"
 #include "cixl/buf.h"
 #include "cixl/func.h"
-#include "cixl/parse.h"
+#include "cixl/tok.h"
 #include "cixl/type.h"
 
 static const void *get_imp_id(const void *value) {

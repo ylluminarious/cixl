@@ -14,6 +14,7 @@ struct cx_box {
   
   union {
     bool as_bool;
+    struct cx_coro *as_coro;
     cx_int_t as_int;
     struct cx_lambda *as_lambda;
     struct cx_type *as_type;

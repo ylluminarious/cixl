@@ -1,6 +1,8 @@
+* add coro tests
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
+* add if fn
 * add Vec type
 ** add [] support
 ** add nrefs to Vec type like lambda
@@ -9,6 +11,7 @@
 * add str support
 ** dup on box copy
 ** add ? func (!= 0)
+* add parse/eval
 * jit func tokens to imps
 ** add CX_TFUNC_IMP
 *** add func ref to imp struct

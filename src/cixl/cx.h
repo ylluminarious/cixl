@@ -20,12 +20,16 @@ struct cx {
   struct cx_set separators;
 
   struct cx_set types;
-  struct cx_type *any_type, *bool_type, *int_type, *lambda_type, *meta_type;
+  struct cx_type *any_type, *bool_type, *coro_type, *int_type, *lambda_type,
+    *meta_type;
 
   struct cx_set macros, funcs;
   
   struct cx_vec scopes;
   struct cx_scope *main;
+
+  struct cx_vec *toks;
+  ssize_t pc, stop_pc;
   
   int row, col;
   struct cx_vec errors;
@@ -50,8 +54,10 @@ struct cx_func_imp *_cx_add_func(struct cx *cx,
 
 struct cx_func *cx_get_func(struct cx *cx, const char *id, bool silent);
 
+struct cx_scope *cx_scope(struct cx *cx);
+void cx_push_scope(struct cx *cx, struct cx_scope *scope);
+struct cx_scope *cx_pop_scope(struct cx *cx, bool silent);
 struct cx_scope *cx_begin(struct cx *cx, bool child);
 void cx_end(struct cx *cx);
-struct cx_scope *cx_scope(struct cx *cx);
 
 #endif

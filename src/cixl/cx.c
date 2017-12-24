@@ -4,6 +4,7 @@
 
 #include "cixl/bool.h"
 #include "cixl/box.h"
+#include "cixl/coro.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
@@ -32,7 +33,7 @@ static const void *get_func_id(const void *value) {
 static ssize_t let_eval(struct cx_macro_eval *eval,
 			struct cx *cx,
 			struct cx_vec *toks,
-			ssize_t i) {
+			ssize_t pc) {
   struct cx_scope *s = cx_begin(cx, true);
   cx_eval(cx, &eval->toks, 1);
   struct cx_box *val = cx_pop(s, false);
@@ -47,7 +48,7 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
   *var = *val;
   cx_end(cx);
   
-  return i+1;
+  return pc+1;
 }
 
 static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -83,7 +84,7 @@ static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
 static ssize_t func_eval(struct cx_macro_eval *eval,
 			 struct cx *cx,
 			 struct cx_vec *toks,
-			 ssize_t i) {
+			 ssize_t pc) {
   struct cx_scope *ps = cx_scope(cx);
   struct cx_scope *s = cx_begin(cx, false);
 
@@ -92,7 +93,7 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
     *cx_set(s, t->data) = *cx_pop(ps, false);
   }
   
-  return i+1;
+  return pc+1;
 }
 
 static bool func_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -187,6 +188,21 @@ static void call_imp(struct cx_scope *scope) {
   cx_box_deinit(&x);
 }
 
+static void yield_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
+  if (scope->coro) {
+    cx_coro_yield(scope->coro);
+  } else {
+    scope = cx_pop_scope(cx, false);
+    if (!scope) { return; }
+    struct cx_coro *coro = cx_coro_init(malloc(sizeof(struct cx_coro)), scope);
+    cx_box_init(cx_push(cx_scope(cx)), cx->coro_type)->as_coro = coro;
+  }
+  
+  cx->stop_pc = cx->pc+1;
+}
+
 static void test_imp(struct cx_scope *scope) {
   struct cx_box x = *cx_ok(cx_pop(scope, false));
   
@@ -214,20 +230,25 @@ struct cx *cx_init(struct cx *cx) {
   
   cx->any_type = cx_add_type(cx, "Any", NULL);
 
-  cx_add_meta_type(cx);
-  cx_add_bool_type(cx);
-  cx_add_int_type(cx);
-  cx_add_lambda_type(cx);
+  cx->meta_type = cx_init_meta_type(cx);
+  cx->bool_type = cx_init_bool_type(cx);
+  cx->int_type = cx_init_int_type(cx);
+  cx->lambda_type = cx_init_lambda_type(cx);
+  cx->coro_type = cx_init_coro_type(cx);
   
   cx_add_func(cx, "dup", cx_arg(cx->any_type))->ptr = dup_imp;
   cx_add_func(cx, "zap", cx_arg(cx->any_type))->ptr = zap_imp;
   cx_add_func(cx, "cls")->ptr = cls_imp;
 
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
+  cx_add_func(cx, "yield", cx_arg(cx->any_type))->ptr = yield_imp;
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
   cx_vec_init(&cx->scopes, sizeof(struct cx_scope *));
   cx->main = cx_begin(cx, false);
+
+  cx->toks = NULL;
+  cx->pc = cx->stop_pc = -1;
   
   cx->row = cx->col = -1;
   cx_vec_init(&cx->errors, sizeof(struct cx_error));
@@ -346,26 +367,40 @@ struct cx_macro *cx_get_macro(struct cx *cx, const char *id, bool silent) {
   return m ? *m : NULL;
 }
 
-struct cx_scope *cx_begin(struct cx *cx, bool child) {
-  struct cx_scope *s = cx_scope_init(malloc(sizeof(struct cx_scope)),
-				     cx,
-				     child ? cx_scope(cx) : NULL);
-  *(struct cx_scope **)cx_vec_push(&cx->scopes) = s;
-  return s;
+struct cx_scope *cx_scope(struct cx *cx) {
+  return *(struct cx_scope **)cx_vec_peek(&cx->scopes);
 }
 
-void cx_end(struct cx *cx) {
-  cx_ok(cx->scopes.count > 1);
+void cx_push_scope(struct cx *cx, struct cx_scope *scope) {
+  *(struct cx_scope **)cx_vec_push(&cx->scopes) = scope;
+}
+
+struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
+  if (cx->scopes.count == 1) {
+    if (!silent) { cx_error(cx, cx->row, cx->col, "No open scopes"); }
+    return NULL;
+  }
+  
   struct cx_scope *s = *(struct cx_scope **)cx_vec_pop(&cx->scopes);
 
   if (s->stack.count) {
     struct cx_box *v = cx_vec_pop(&s->stack);
     *cx_push(cx_scope(cx)) = *v;   
   }
-  
-  free(cx_scope_deinit(s));
+
+  return s;
 }
 
-struct cx_scope *cx_scope(struct cx *cx) {
-  return *(struct cx_scope **)cx_vec_peek(&cx->scopes);
+
+struct cx_scope *cx_begin(struct cx *cx, bool child) {
+  struct cx_scope *s = cx_scope_init(malloc(sizeof(struct cx_scope)),
+				     cx,
+				     child ? cx_scope(cx) : NULL);
+  cx_push_scope(cx, s);
+  return s;
+}
+
+void cx_end(struct cx *cx) {
+  struct cx_scope *s = cx_pop_scope(cx, false);
+  if (cx) { free(cx_scope_deinit(s)); }
 }

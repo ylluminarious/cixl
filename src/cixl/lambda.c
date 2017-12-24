@@ -5,7 +5,7 @@
 #include "cixl/eval.h"
 #include "cixl/lambda.h"
 #include "cixl/scope.h"
-#include "cixl/parse.h"
+#include "cixl/tok.h"
 
 struct cx_lambda *cx_lambda_init(struct cx_lambda *lambda) {
   cx_vec_init(&lambda->body, sizeof(struct cx_tok));
@@ -38,11 +38,11 @@ static void deinit(struct cx_box *value) {
   if (!value->as_lambda->nrefs) { free(cx_lambda_deinit(value->as_lambda)); }
 }
 
-void cx_add_lambda_type(struct cx *cx) {
+struct cx_type *cx_init_lambda_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Lambda", cx->any_type, NULL);
   t->fprint = fprint;
   t->call = call;
   t->copy = copy;
   t->deinit = deinit;
-  cx->lambda_type = t;
+  return t;
 }

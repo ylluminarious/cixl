@@ -13,39 +13,6 @@
 #include "cixl/parse.h"
 #include "cixl/vec.h"
 
-struct cx_tok *cx_tok_init(struct cx_tok *tok,
-			   enum cx_tok_type type,
-			   void *data,
-			   int row, int col) {
-  tok->type = type;
-  tok->data = data;
-  tok->row = row;
-  tok->col = col;
-  return tok;
-}
-
-struct cx_tok *cx_tok_deinit(struct cx_tok *tok) {
-  switch (tok->type) {
-  case CX_TGROUP: {
-    struct cx_vec *body = tok->data;
-    cx_do_vec(body, struct cx_tok, t) { cx_tok_deinit(t); }
-    free(cx_vec_deinit(body));
-    break;
-  }
-  case CX_TID:
-  case CX_TLITERAL:
-    if (tok->data) { free(tok->data); }
-    break;
-  case CX_TMACRO:
-    free(cx_macro_eval_deinit(tok->data));
-    break;
-  default:
-    break;
-  }
-   
-  return tok;
-}
-
 bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   struct cx_buf id;
   cx_buf_open(&id);

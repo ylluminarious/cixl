@@ -45,7 +45,8 @@ static void fprint(struct cx_box *value, FILE *out) {
   fprintf(out, "Type(%s)", value->as_type->id);
 }
 
-void cx_add_meta_type(struct cx *cx) {
-  cx->meta_type = cx_add_type(cx, "Meta", cx->any_type, NULL);
-  cx->meta_type->fprint = fprint;
+struct cx_type *cx_init_meta_type(struct cx *cx) {
+  struct cx_type *t = cx_add_type(cx, "Meta", cx->any_type, NULL);
+  t->fprint = fprint;
+  return t;
 }

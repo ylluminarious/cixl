@@ -1,4 +1,5 @@
 #include "cixl/box.h"
+#include "cixl/coro.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/scope.h"
@@ -9,6 +10,7 @@ struct cx_scope *cx_scope_init(struct cx_scope *scope,
 			       struct cx_scope *parent) {
   scope->cx = cx;
   scope->parent = parent;
+  scope->coro = NULL;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
 
   cx_set_init(&scope->env, sizeof(struct cx_var), cx_cmp_str);

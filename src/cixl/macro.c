@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "cixl/macro.h"
-#include "cixl/parse.h"
+#include "cixl/tok.h"
 
 struct cx_macro *cx_macro_init(struct cx_macro *macro,
 			       const char *id,

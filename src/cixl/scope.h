@@ -6,10 +6,12 @@
 #include "cixl/vec.h"
 
 struct cx;
+struct cx_coro;
 
 struct cx_scope {
   struct cx *cx;
   struct cx_scope *parent;
+  struct cx_coro *coro;
   struct cx_vec stack;
   struct cx_set env;
 };

@@ -4,9 +4,10 @@
 #include <stdint.h>
 
 struct cx;
+struct cx_type;
 
 typedef int64_t cx_int_t;
 
-void cx_add_int_type(struct cx *cx);
+struct cx_type *cx_init_int_type(struct cx *cx);
 
 #endif

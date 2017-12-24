@@ -2,7 +2,8 @@
 #define CX_BOOL_H
 
 struct cx;
+struct cx_type;
 
-void cx_add_bool_type(struct cx *cx);
+struct cx_type *cx_init_bool_type(struct cx *cx);
 
 #endif

@@ -22,11 +22,13 @@ static void not_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = !x.as_bool;
 }
 
-void cx_add_bool_type(struct cx *cx) {
-  cx->bool_type = cx_add_type(cx, "Bool", cx->any_type, NULL);
-  cx->bool_type->fprint = fprint;
+struct cx_type *cx_init_bool_type(struct cx *cx) {
+  struct cx_type *t = cx_add_type(cx, "Bool", cx->any_type, NULL);
+  t->fprint = fprint;
 
   cx_add_func(cx, "true")->ptr = true_imp;
   cx_add_func(cx, "false")->ptr = false_imp;
   cx_add_func(cx, "not")->ptr = not_imp;
+
+  return t;
 }
