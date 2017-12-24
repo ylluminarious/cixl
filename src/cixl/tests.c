@@ -1,9 +1,12 @@
 #include "cixl/cx.h"
 #include "cixl/error.h"
 #include "cixl/eval.h"
+#include "cixl/scope.h"
 #include "cixl/tests.h"
 
 static void run(struct cx *cx, const char *in) {
+  cx_vec_clear(&cx_scope(cx, 0)->stack);
+  
   if (!cx_eval_str(cx, in)) {
     printf("%s\n", in);
     
