@@ -117,7 +117,9 @@ The ```func:``` macro may be used to define named functions. Several implementat
 ..foo
 ..
 [42]
+```
 
+```
 > func: foo() 42;
 ..&foo
 ..
@@ -126,20 +128,21 @@ The ```func:``` macro may be used to define named functions. Several implementat
 > call
 ..
 [42]
+```
 
+```
 > func: bar(x Int) $x + 35;
-..cls
 ..bar 7
 ..
 [42]
+```
 
+```
 > func: baz(x y Int z 0)
     $x + $y + $z;
-..cls
 ..baz 1 3 5
 ..
 [9]
-
 ```
 
 ### Coroutines
@@ -152,9 +155,10 @@ Coroutines allow stopping and resuming execution. A coroutine context is returne
 > call
 ..
 [1 2 3]
+````
 
-> cls
-..(1 2 yield 3)
+```
+> (1 2 yield 3)
 ..
 [2 Coro(0x53c9de0:1)]
 
@@ -166,7 +170,9 @@ Coroutines allow stopping and resuming execution. A coroutine context is returne
 ..
 Error in row 1, col 5:
 Coro is done
+```
 
+```
 > func: foo()
 ..  1 2 yield 3;
 ..foo call
