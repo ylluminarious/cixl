@@ -196,6 +196,7 @@ static void test_imp(struct cx_scope *scope) {
 }
 
 struct cx *cx_init(struct cx *cx) {
+  cx->coro = NULL;
   cx->toks = NULL;
   cx->pc = cx->stop_pc = -1;  
   cx->row = cx->col = -1;

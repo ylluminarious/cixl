@@ -16,7 +16,9 @@ struct cx_coro {
   bool done;
 };
 
-struct cx_coro *cx_coro_init(struct cx_coro *coro, struct cx_scope *scope);
+struct cx_coro *cx_coro_init(struct cx_coro *coro,
+			     struct cx *cx,
+			     struct cx_scope *scope);
 struct cx_coro *cx_coro_deinit(struct cx_coro *coro);
 
 struct cx_type *cx_init_coro_type(struct cx *cx);

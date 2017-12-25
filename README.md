@@ -134,10 +134,18 @@ The ```func:``` macro may be used to define named functions. Several implementat
 ```
 
 ### Coroutines
-Coroutines allow stopping and resuming execution of a scope. The coroutine context is returned on first yield, and ```call```-ing it picks up the trail from previous ```yield```.
+Coroutines allow stopping and resuming execution. A coroutine context is returned on first yield, and ```call```-ing it picks up the trail from previous ```yield```.
 
 ```
-> (1 2 yield 3)
+> 1 2 yield 3
+..
+[1 2 Coro(0x540a0d0:1)]
+> call
+..
+[1 2 3]
+
+> cls
+..(1 2 yield 3)
 ..
 [2 Coro(0x53c9de0:1)]
 

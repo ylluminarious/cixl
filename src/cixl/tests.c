@@ -70,6 +70,8 @@ static void coro_tests() {
   run(&cx, "func: foo() 1 2 yield 3; foo call + 5 = test");
   run(&cx, "(let: x 42; yield $x) call 42 = test");
   run(&cx, "(let: x 42; (yield $x)) call 42 = test");
+  //run(&cx, "(if true {1 yield 2} {} 3) call");
+  
   cx_deinit(&cx);
 }
 

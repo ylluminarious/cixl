@@ -27,7 +27,8 @@ struct cx {
   
   struct cx_vec scopes;
   struct cx_scope *main;
-
+  
+  struct cx_coro *coro;
   struct cx_vec *toks;
   ssize_t pc, stop_pc;
   
