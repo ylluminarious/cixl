@@ -72,6 +72,11 @@ static void coro_tests() {
   run(&cx, "(let: x 42; yield $x) call 42 = test");
   run(&cx, "(let: x 42; (yield $x)) call 42 = test");
 
+  run(&cx,
+      "{1 2 yield cls 3 4} "
+      "func: bar(x Lambda) $x call call; "
+      "bar + 6 = test");
+
   //run(&cx, "(if true {1 yield 2} {} 3) call");
   
   cx_deinit(&cx);
