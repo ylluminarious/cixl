@@ -81,6 +81,26 @@ Named variables may be bound once per scope using the ```let:``` macro.
 [42]
 ```
 
+### Scopes
+Enclosing code in parens evaluates it in a separate scope with a clean stack. The last value on the stack is automatically returned on scope exit.
+
+```
+> (1 2 3)
+..
+[3]
+```
+
+Variables in the parent scope may be referenced from within the scope, but variables defined inside are not visible from the outside.
+
+```
+> let: foo 1;
+..(let: foo 2; $foo)
+..$foo
+..
+[2 1]
+```
+
+
 ### Lambdas
 Putting braces around a block of code defines a lambda, which is then pushed on the stack.
 
@@ -100,26 +120,6 @@ Lambdas inherit the defining scope.
 > (let: x 42; {$x}) call
 ..
 [42]
-```
-
-
-### Scopes
-Enclosing code in parens evaluates in a separate scope/stack. The last value on the stack is automatically returned on scope exit.
-
-```
-> (1 2 3)
-..
-[3]
-```
-
-Variables in the parent scope may be referenced from within the scope, but variables defined inside are not visible from the outside.
-
-```
-> let: foo 1;
-..(let: foo 2; $foo)
-..$foo
-..
-[2 1]
 ```
 
 ### Functions

@@ -1,4 +1,3 @@
-* add lambda closures
 * add if fn
 * add recall
 ** forced tail call
