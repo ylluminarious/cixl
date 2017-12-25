@@ -95,13 +95,17 @@ Braces quote contained code, which is then pushed on the stack.
 ```
 
 ### Scopes
-Enclosing code in parens evaluates in a separate scope/stack. Variables in the parent scope may be referenced from within the scope, but variables defined inside are not visible from the outside. The last value on the stack is automatically returned on scope exit.
+Enclosing code in parens evaluates in a separate scope/stack. The last value on the stack is automatically returned on scope exit.
 
 ```
 > (1 2 3)
 ..
 [3]
+```
 
+Variables in the parent scope may be referenced from within the scope, but variables defined inside are not visible from the outside.
+
+```
 > let: foo 1;
 ..(let: foo 2; $foo)
 ..$foo
