@@ -119,7 +119,11 @@ The ```func:``` macro may be used to define named functions. Several implementat
 [42]
 
 > func: foo() 42;
-..&foo call
+..&foo
+..
+[Func(foo)]
+
+> call
 ..
 [42]
 
