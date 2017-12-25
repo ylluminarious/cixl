@@ -38,12 +38,15 @@ Any name that starts with an uppercase letter is treated as a type reference. Th
 - Coro (A)
 - Func (A)
 - Int  (A)
-- Meta (A)
 - Lambda (A)
+- Type (A)
 
 ```
-> A
-[Type(A)]
+> type 42
+[Int]
+
+> is A
+[t]
 ```
 
 ### Stack

@@ -17,7 +17,10 @@ static void ok_imp(struct cx_scope *scope) {
 }
 
 static void eq_imp(struct cx_scope *scope) {
-  struct cx_box y = *cx_ok(cx_pop(scope, false)), x = *cx_ok(cx_pop(scope, false));
+  struct cx_box
+    y = *cx_ok(cx_pop(scope, false)),
+    x = *cx_ok(cx_pop(scope, false));
+  
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = x.as_int == y.as_int;
 }
 

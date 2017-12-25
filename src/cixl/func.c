@@ -106,7 +106,7 @@ struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) 
       
       struct cx_box *arg = cx_vec_get(stack, j);
       
-      if (!cx_isa(arg->type, imp_type)) {
+      if (!cx_type_is(arg->type, imp_type)) {
 	match = false;
 	break;
       }

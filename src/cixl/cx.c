@@ -227,7 +227,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->func_type = cx_init_func_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
   cx->coro_type = cx_init_coro_type(cx);
-  
+
   cx_add_func(cx, "dup", cx_arg(cx->any_type))->ptr = dup_imp;
   cx_add_func(cx, "zap", cx_arg(cx->any_type))->ptr = zap_imp;
   cx_add_func(cx, "cls")->ptr = cls_imp;

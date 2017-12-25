@@ -1,3 +1,4 @@
+* add type tests from readme
 * add if fn
 * add recall
 ** forced tail call
