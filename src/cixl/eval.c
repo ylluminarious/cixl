@@ -118,24 +118,19 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
 
 bool cx_eval(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   cx->pc = pc;
-  struct cx_scope *scope = cx_scope(cx, 0);
+  bool ok = false;
   
-  if (toks != &scope->toks) {
-    cx_do_vec(&scope->toks, struct cx_tok, t) { cx_tok_deinit(t); }
-    cx_vec_clear(&scope->toks);
-  
-    cx_do_vec(toks, struct cx_tok, t) {
-      cx_tok_copy(cx_vec_push(&scope->toks), t);
-    }
+  while (cx->pc < toks->count && cx->pc != cx->stop_pc) {
+    cx->toks = toks;
+    if ((cx->pc = cx_eval_tok(cx, toks, cx->pc)) == -1) { goto exit; }
+    if (cx->errors.count) { goto exit; }
   }
 
-  while (cx->pc < toks->count && cx->pc != cx->stop_pc) {
-    if ((cx->pc = cx_eval_tok(cx, toks, cx->pc)) == -1) { return false; }
-    if (cx->errors.count) { return false; }
-  }
-  
+  ok = true;
+ exit:
+  cx->toks = NULL;
   cx->stop_pc = -1;
-  return true;
+  return ok;
 }
 
 bool cx_eval_str(struct cx *cx, const char *in) {

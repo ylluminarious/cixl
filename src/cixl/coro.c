@@ -9,14 +9,26 @@
 
 struct cx_coro *cx_coro_init(struct cx_coro *coro, struct cx_scope *scope) {
   coro->scope = scope;
+
+  cx_vec_init(&coro->toks, sizeof(struct cx_tok));
   coro->pc = scope->cx->pc+1;
+
   coro->nrefs = 1;
   coro->done = false;
+
+  cx_do_vec(cx_ok(scope->cx->toks), struct cx_tok, t) {
+    cx_tok_copy(cx_vec_push(&coro->toks), t);
+  }
+  
   return coro;
 }
 
 struct cx_coro *cx_coro_deinit(struct cx_coro *coro) {
   cx_scope_unref(coro->scope);
+
+  cx_do_vec(&coro->toks, struct cx_tok, t) { cx_tok_deinit(t); }
+  cx_vec_deinit(&coro->toks);
+
   return coro;
 }
 
@@ -43,10 +55,10 @@ static void call(struct cx_box *value, struct cx_scope *scope) {
     cx_error(cx, cx->row, cx->col, "Coro is done");
   } else {
     cx_push_scope(cx, coro->scope);
-    if (!cx_eval(cx, &coro->scope->toks, coro->pc)) { return; }
+    if (!cx_eval(cx, &coro->toks, coro->pc)) { return; }
     coro->pc = cx->pc;
     cx_pop_scope(cx, coro->scope);
-    if (coro->pc == coro->scope->toks.count) { coro->done = true; }
+    if (coro->pc == coro->toks.count) { coro->done = true; }
   }
 }
 

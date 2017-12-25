@@ -196,6 +196,10 @@ static void test_imp(struct cx_scope *scope) {
 }
 
 struct cx *cx_init(struct cx *cx) {
+  cx->toks = NULL;
+  cx->pc = cx->stop_pc = -1;  
+  cx->row = cx->col = -1;
+  
   cx_set_init(&cx->separators, sizeof(char), cx_cmp_char);
   cx_add_separators(cx, " \t\n;(){}[]");
 
@@ -229,8 +233,6 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
-  cx->pc = cx->stop_pc = -1;  
-  cx->row = cx->col = -1;
   cx->main = cx_begin(cx, false);
   return cx;
 }

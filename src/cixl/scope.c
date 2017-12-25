@@ -16,7 +16,6 @@ struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
   cx_set_init(&scope->env, sizeof(struct cx_var), cx_cmp_str);
   scope->env.key_offset = offsetof(struct cx_var, id);
 
-  cx_vec_init(&scope->toks, sizeof(struct cx_tok));
   scope->nrefs = 1;
   return scope;
 }
@@ -36,9 +35,6 @@ void cx_scope_unref(struct cx_scope *scope) {
     
     cx_do_set(&scope->env, struct cx_var, v) { cx_var_deinit(v); }
     cx_set_deinit(&scope->env);
-
-    cx_do_vec(&scope->toks, struct cx_tok, t) { cx_tok_deinit(t); }
-    cx_vec_deinit(&scope->toks);
 
     if (scope->parent) { cx_scope_unref(scope->parent); }
     free(scope);

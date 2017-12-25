@@ -10,6 +10,7 @@ struct cx_type;
 
 struct cx_coro {
   struct cx_scope *scope;
+  struct cx_vec toks;
   ssize_t pc;
   int nrefs;
   bool done;
