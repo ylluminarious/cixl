@@ -2,6 +2,7 @@
 
 #include "cixl/cx.h"
 #include "cixl/box.h"
+#include "cixl/error.h"
 #include "cixl/eval.h"
 #include "cixl/lambda.h"
 #include "cixl/scope.h"
@@ -9,7 +10,7 @@
 
 struct cx_lambda *cx_lambda_init(struct cx_lambda *lambda) {
   cx_vec_init(&lambda->body, sizeof(struct cx_tok));
-  lambda->nrefs = 0;
+  lambda->nrefs = 1;
   return lambda;
 }
 
@@ -34,8 +35,10 @@ static void copy(struct cx_box *dst, struct cx_box *src) {
 }
 
 static void deinit(struct cx_box *value) {
-  value->as_lambda->nrefs--;
-  if (!value->as_lambda->nrefs) { free(cx_lambda_deinit(value->as_lambda)); }
+  struct cx_lambda *l = value->as_lambda;
+  cx_ok(l->nrefs > 0);
+  l->nrefs--;
+  if (!l->nrefs) { free(cx_lambda_deinit(l)); }
 }
 
 struct cx_type *cx_init_lambda_type(struct cx *cx) {

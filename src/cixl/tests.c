@@ -66,10 +66,10 @@ static void coro_tests() {
   cx_init(&cx);
 
   run(&cx, "(1 2 yield 3) call + 5 = test");
+  run(&cx, "({1 2 yield 3} call call) + 5 = test");
   run(&cx, "func: foo() 1 2 yield 3; foo call + 5 = test");
   run(&cx, "(let: x 42; yield $x) call 42 = test");
   run(&cx, "(let: x 42; (yield $x)) call 42 = test");
-
   cx_deinit(&cx);
 }
 

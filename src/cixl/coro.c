@@ -61,8 +61,10 @@ static void copy(struct cx_box *dst, struct cx_box *src) {
 }
 
 static void deinit(struct cx_box *value) {
-  value->as_coro->nrefs--;
-  if (!value->as_coro->nrefs) { free(cx_coro_deinit(value->as_coro)); }
+  struct cx_coro *coro = value->as_coro;
+  cx_ok(coro->nrefs > 0);
+  coro->nrefs--;
+  if (!coro->nrefs) { free(cx_coro_deinit(coro)); }
 }
 
 struct cx_type *cx_init_coro_type(struct cx *cx) {

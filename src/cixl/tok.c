@@ -26,8 +26,10 @@ struct cx_tok *cx_tok_deinit(struct cx_tok *tok) {
     break;
   }
   case CX_TID:
+    free(tok->data);
+    break;
   case CX_TLITERAL:
-    if (tok->data) { free(tok->data); }
+    free(cx_box_deinit(tok->data));
     break;
   case CX_TMACRO:
     cx_macro_eval_unref(tok->data);

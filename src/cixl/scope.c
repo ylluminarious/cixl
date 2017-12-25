@@ -27,6 +27,7 @@ struct cx_scope *cx_scope_ref(struct cx_scope *scope) {
 }
 
 void cx_scope_unref(struct cx_scope *scope) {
+  cx_ok(scope->nrefs > 0);
   scope->nrefs--;
   
   if (!scope->nrefs) {

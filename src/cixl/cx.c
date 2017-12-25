@@ -241,14 +241,14 @@ struct cx *cx_deinit(struct cx *cx) {
   cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_unref(*s); }
   cx_vec_deinit(&cx->scopes);
 
-  cx_do_set(&cx->types, struct cx_type *, t) { free(cx_type_deinit(*t)); }
-  cx_set_deinit(&cx->types);
-
   cx_do_set(&cx->macros, struct cx_macro *, m) { free(cx_macro_deinit(*m)); }
   cx_set_deinit(&cx->macros);
 
   cx_do_set(&cx->funcs, struct cx_func *, f) { free(cx_func_deinit(*f)); }
   cx_set_deinit(&cx->funcs);
+
+  cx_do_set(&cx->types, struct cx_type *, t) { free(cx_type_deinit(*t)); }
+  cx_set_deinit(&cx->types);
 
   cx_do_vec(&cx->errors, char *, e) { free(*e); }
   cx_vec_deinit(&cx->errors);
