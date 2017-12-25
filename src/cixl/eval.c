@@ -58,28 +58,13 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   }
 
   struct cx_scope *scope = cx_scope(cx, 0);
-
+  
   if (scope->stack.count < func->nargs) {
     cx_error(cx, row, col, "Not enough args for func: '%s'", func->id);
     return -1;
   }
 
-  struct cx_func_imp *imp = cx_func_get_imp(func, &scope->stack);
-
-  if (!imp) {
-    cx_error(cx, row, col, "Func not applicable: '%s'", func->id);
-    return -1;
-  }
-
-  if (imp->ptr) {
-    imp->ptr(scope);
-  } else {
-    struct cx_scope *s = cx_begin(cx, false);
-    if (!cx_eval(cx, &imp->toks, 0)) { return -1; }
-    if (cx_scope(cx, 0) == s) { cx_end(cx); }
-  }
-  
-  return pc;
+  return cx_funcall(func, scope, row, col) ? pc : -1;
 }
 
 ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t pc) {

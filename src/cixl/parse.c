@@ -48,14 +48,22 @@ bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	} else if (id.data[0] == '$' || isupper(id.data[0])) {
 	  cx_tok_init(cx_vec_push(out), CX_TID, id.data, cx->row, cx->col);
 	} else {
-	  struct cx_func *f = cx_get_func(cx, id.data, false);
+	  bool ref = id.data[0] == '&';
+	  struct cx_func *f = cx_get_func(cx, ref ? id.data+1 : id.data, false);
 
 	  if (!f) {
 	    free(id.data);
 	    return false;
 	  }
+
+	  if (ref) {
+	    struct cx_box *box = cx_box_new(cx->func_type);
+	    box->as_func = f;
+	    cx_tok_init(cx_vec_push(out), CX_TLITERAL, box, cx->row, cx->col);
+	  } else {
+	    cx_tok_init(cx_vec_push(out), CX_TFUNC, f, cx->row, cx->col);
+	  }
 	  
-	  cx_tok_init(cx_vec_push(out), CX_TFUNC, f, cx->row, cx->col);
 	  free(id.data);
 	}
 	
@@ -97,14 +105,9 @@ bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
       free(value.data);
       
       if (int_value || !errno) {
-	struct cx_box *box = cx_box_init(malloc(sizeof(struct cx_box)), cx->int_type);
+	struct cx_box *box = cx_box_new(cx->int_type);
 	box->as_int = int_value;
-	
-	cx_tok_init(cx_vec_push(out),
-		    CX_TLITERAL,
-		    box,
-		    cx->row, cx->col);
-	
+	cx_tok_init(cx_vec_push(out), CX_TLITERAL, box, cx->row, cx->col);
 	cx->col = col;
       }
     } else {
@@ -155,7 +158,7 @@ bool cx_parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
     }
   }
 
-  struct cx_box *box = cx_box_init(malloc(sizeof(struct cx_box)), cx->lambda_type);
+  struct cx_box *box = cx_box_new(cx->lambda_type);
   box->as_lambda = lambda;
   cx_tok_init(cx_vec_push(out), CX_TLITERAL, box, row, col);
   return true;

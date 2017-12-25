@@ -7,8 +7,9 @@
 #include "cixl/scope.h"
 #include "cixl/type.h"
 
-static void default_call(struct cx_box *value, struct cx_scope *scope) {
+static bool default_call(struct cx_box *value, struct cx_scope *scope) {
   cx_box_copy(cx_push(scope), value);
+  return true;
 }
 
 struct cx_type *cx_type_init(struct cx_type *type, const char *id) {

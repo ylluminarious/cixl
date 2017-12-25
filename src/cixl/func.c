@@ -3,7 +3,11 @@
 
 #include "cixl/box.h"
 #include "cixl/buf.h"
+#include "cixl/cx.h"
+#include "cixl/error.h"
+#include "cixl/eval.h"
 #include "cixl/func.h"
+#include "cixl/scope.h"
 #include "cixl/tok.h"
 #include "cixl/type.h"
 
@@ -73,10 +77,15 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
   }
     
   cx_buf_close(&id);
-  struct cx_func_imp *imp = cx_set_get(&func->imps, &id.data);
-  if (imp) { cx_set_delete(&func->imps, &id.data); }
+  struct cx_func_imp **found = cx_set_get(&func->imps, &id.data);
+  
+  if (found) {
+    cx_set_delete(&func->imps, &id.data);
+    free(cx_func_imp_deinit(*found));
+  }
 
-  imp = cx_func_imp_init(malloc(sizeof(struct cx_func_imp)), id.data);
+  struct cx_func_imp *imp = cx_func_imp_init(malloc(sizeof(struct cx_func_imp)),
+					     id.data);
   *(struct cx_func_imp **)cx_set_insert(&func->imps, &id.data) = imp;
   imp->args = imp_args;
   return imp;
@@ -107,4 +116,40 @@ struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) 
   }
 
   return NULL;
+}
+
+bool cx_funcall(struct cx_func *func, struct cx_scope *scope, int row, int col) {
+  struct cx *cx = scope->cx;
+  struct cx_func_imp *imp = cx_func_get_imp(func, &scope->stack);
+
+  if (!imp) {
+    cx_error(cx, row, col, "Func not applicable: '%s'", func->id);
+    return -1;
+  }
+
+  if (imp->ptr) {
+    imp->ptr(scope);
+  } else {
+    struct cx_scope *func_scope = cx_begin(cx, false);
+    if (!cx_eval(cx, &imp->toks, 0)) { return false; }
+    if (cx_scope(cx, 0) == func_scope) { cx_end(cx); }
+  }
+
+  return true;
+}
+
+static void fprint(struct cx_box *value, FILE *out) {
+  fprintf(out, "Func(%s)", value->as_func->id);
+}
+
+static bool call(struct cx_box *value, struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  return cx_funcall(value->as_func, scope, cx->row, cx->col);
+}
+
+struct cx_type *cx_init_func_type(struct cx *cx) {
+  struct cx_type *t = cx_add_type(cx, "Func", cx->any_type, NULL);
+  t->fprint = fprint;
+  t->call = call;
+  return t;
 }

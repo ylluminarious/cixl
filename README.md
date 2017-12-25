@@ -6,7 +6,7 @@
 This project aims to produce a minimalistic extension language, or DSL substrate; in C. In a way, it's Lua taken one step further down the path of simplicity. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on transparency and flexibility.
 
 ### Status
-Examples from this document should work without a hitch and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on tracing interactions between core features; as soon as I gain enough confidence that I've steered clear of any major disasters, I'll start filling in obvious gaps in functionality.
+Examples from this document should work without a hitch and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on tracing interactions between core features; as soon as I gain enough confidence that I've steered clear of major disasters, I'll start filling in obvious gaps in functionality.
 
 ### Getting Started
 To get started, you'll need a decent C compiler with GNU-extensions and CMake installed. A primitive REPL is included, the executable weighs in at 200k. It's highly recommended to run the REPL through ```rlwrap``` for a less nerve-wrecking editing experience.
@@ -110,11 +110,16 @@ Enclosing code in parens evaluates in a separate scope/stack. Variables in the p
 ```
 
 ### Functions
-The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same number of arguments and different types. An integer may be specified instead of argument type, which is then substituted for the actual type of that argument on evaluation. Each function opens an implicit scope that is closed on exit.
+The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. An integer may be specified instead of argument type, which is then substituted for the actual type of that argument on evaluation. Each function opens an implicit scope that is closed on exit. Prefixing a function name with ```&``` pushes a reference on the stack.
 
 ```
 > func: foo() 42;
 ..foo
+..
+[42]
+
+> func: foo() 42;
+..&foo call
 ..
 [42]
 

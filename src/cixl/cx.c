@@ -224,6 +224,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->meta_type = cx_init_meta_type(cx);
   cx->bool_type = cx_init_bool_type(cx);
   cx->int_type = cx_init_int_type(cx);
+  cx->func_type = cx_init_func_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
   cx->coro_type = cx_init_coro_type(cx);
   

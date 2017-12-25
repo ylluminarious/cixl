@@ -20,8 +20,8 @@ struct cx {
   struct cx_set separators;
 
   struct cx_set types;
-  struct cx_type *any_type, *bool_type, *coro_type, *int_type, *lambda_type,
-    *meta_type;
+  struct cx_type *any_type, *bool_type, *coro_type, *func_type, *int_type,
+    *lambda_type, *meta_type;
 
   struct cx_set macros, funcs;
   

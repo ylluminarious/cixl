@@ -11,7 +11,7 @@ struct cx_scope;
 struct cx_type {
   char *id;
   struct cx_set parents;
-  void (*call)(struct cx_box *, struct cx_scope *);
+  bool (*call)(struct cx_box *, struct cx_scope *);
   void (*copy)(struct cx_box *dst, struct cx_box *src);
   void (*fprint)(struct cx_box *, FILE *);
   void (*deinit)(struct cx_box *);

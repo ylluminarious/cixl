@@ -19,6 +19,18 @@ static void run(struct cx *cx, const char *in) {
   }
 }
 
+static void int_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "42 ? test");
+  run(&cx, "0 ? not test");
+  run(&cx, "21 + 21 = 42 test");
+  run(&cx, "1 = 2 not test");
+
+  cx_deinit(&cx);
+}
+
 static void stack_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -38,23 +50,12 @@ static void group_tests() {
   cx_deinit(&cx);
 }
 
-static void int_tests() {
-  struct cx cx;
-  cx_init(&cx);
-
-  run(&cx, "42 ? test");
-  run(&cx, "0 ? not test");
-  run(&cx, "21 + 21 = 42 test");
-  run(&cx, "1 = 2 not test");
-
-  cx_deinit(&cx);
-}
-
 static void func_tests() {
   struct cx cx;
   cx_init(&cx);
 
   run(&cx, "func: foo() 42; foo = 42 test");
+  run(&cx, "func: foo() 42; &foo call = 42 test");
   run(&cx, "func: bar(x Int) $x + 35; bar 7 42 = test");
   run(&cx, "func: baz(x y Int z 0) $x + $y + $z; baz 1 3 5 9 = test");
 
@@ -76,9 +77,9 @@ static void coro_tests() {
 }
 
 void cx_tests() {
+  int_tests();
   stack_tests();
   group_tests();
-  int_tests();
   func_tests();
   coro_tests();
 }

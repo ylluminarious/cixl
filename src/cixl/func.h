@@ -40,5 +40,8 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
 				    struct cx_func_arg *args);
 
 struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *args);
+bool cx_funcall(struct cx_func *func, struct cx_scope *scope, int row, int col);
+
+struct cx_type *cx_init_func_type(struct cx *cx);
 
 #endif

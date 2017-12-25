@@ -20,8 +20,8 @@ struct cx_lambda *cx_lambda_deinit(struct cx_lambda *lambda) {
   return lambda;
 }
 
-static void call(struct cx_box *value, struct cx_scope *scope) {
-  cx_eval(scope->cx, &value->as_lambda->body, 0);
+static bool call(struct cx_box *value, struct cx_scope *scope) {
+  return cx_eval(scope->cx, &value->as_lambda->body, 0);
 }
 
 static void fprint(struct cx_box *value, FILE *out) { 

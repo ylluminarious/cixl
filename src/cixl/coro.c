@@ -50,22 +50,24 @@ static void yield_imp(struct cx_scope *scope) {
   cx->stop_pc = cx->pc+1;
 }
 
-static void call(struct cx_box *value, struct cx_scope *scope) {
+static bool call(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_coro *coro = value->as_coro;
   
   if (coro->done) {
     cx_error(cx, cx->row, cx->col, "Coro is done");
-  } else {
-    if (coro->scope) { cx_push_scope(cx, coro->scope); }
-    cx->coro = coro;
-    bool ok = cx_eval(cx, &coro->toks, coro->pc);
-    cx->coro = NULL;
-    if (!ok) { return; }
-    coro->pc = cx->pc;
-    if (coro->scope) { cx_pop_scope(cx, coro->scope); }
-    if (coro->pc == coro->toks.count) { coro->done = true; }
+    return false;
   }
+    
+  if (coro->scope) { cx_push_scope(cx, coro->scope); }
+  cx->coro = coro;
+  bool ok = cx_eval(cx, &coro->toks, coro->pc);
+  cx->coro = NULL;
+  if (!ok) { return false; }
+  coro->pc = cx->pc;
+  if (coro->scope) { cx_pop_scope(cx, coro->scope); }
+  if (coro->pc == coro->toks.count) { coro->done = true; }
+  return true;
 }
 
 static void fprint(struct cx_box *value, FILE *out) { 
