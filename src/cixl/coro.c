@@ -59,14 +59,19 @@ static bool call(struct cx_box *value, struct cx_scope *scope) {
     return false;
   }
     
-  if (coro->scope) { cx_push_scope(cx, coro->scope); }
+  if (coro->scope) {
+    cx_push_scope(cx, coro->scope);
+  } else {
+    cx_push_scope(cx, cx->main);
+  }
+  
   cx->coro = coro;
   bool ok = cx_eval(cx, &coro->toks, coro->pc);
   cx->coro = NULL;
   if (!ok) { return false; }
   coro->pc = cx->pc;
-  if (coro->scope) { cx_pop_scope(cx, coro->scope); }
   if (coro->pc == coro->toks.count) { coro->done = true; }
+  cx_pop_scope(cx, false);
   return true;
 }
 

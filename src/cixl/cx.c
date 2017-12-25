@@ -219,7 +219,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_macro(cx, "let:", let_parse);
   cx_add_macro(cx, "func:", func_parse);
   
-  cx->any_type = cx_add_type(cx, "Any", NULL);
+  cx->any_type = cx_add_type(cx, "A", NULL);
 
   cx->meta_type = cx_init_meta_type(cx);
   cx->bool_type = cx_init_bool_type(cx);
@@ -375,7 +375,6 @@ struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
   return s;
 }
 
-
 struct cx_scope *cx_begin(struct cx *cx, bool child) {
   struct cx_scope *s = cx_scope_new(cx, child ? cx_scope(cx, 0) : NULL);
   cx_push_scope(cx, s);
@@ -384,5 +383,5 @@ struct cx_scope *cx_begin(struct cx *cx, bool child) {
 
 void cx_end(struct cx *cx) {
   struct cx_scope *s = cx_pop_scope(cx, false);
-  if (cx) { cx_scope_unref(s); }
+  if (s) { cx_scope_unref(s); }
 }

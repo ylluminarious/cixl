@@ -110,7 +110,7 @@ Enclosing code in parens evaluates in a separate scope/stack. Variables in the p
 ```
 
 ### Functions
-The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. An integer may be specified instead of argument type, which is then substituted for the actual type of that argument on evaluation. Each function opens an implicit scope that is closed on exit. Prefixing a function name with ```&``` pushes a reference on the stack.
+The ```func:``` macro may be used to define named functions. Several implementations may be defined for the same name as long as they have the same arity and different argument types. Each function opens an implicit scope that is closed on exit.
 
 ```
 > func: foo() 42;
@@ -118,6 +118,8 @@ The ```func:``` macro may be used to define named functions. Several implementat
 ..
 [42]
 ```
+
+Prefixing a function name with ```&``` pushes a reference on the stack.
 
 ```
 > func: foo() 42;
@@ -130,12 +132,16 @@ The ```func:``` macro may be used to define named functions. Several implementat
 [42]
 ```
 
+Each argument needs a type, ```A``` may be used to allow any type.
+
 ```
-> func: bar(x Int) $x + 35;
+> func: bar(x A) $x + 35;
 ..bar 7
 ..
 [42]
 ```
+
+Several parameters may share the same type. An index may may be specified instead of type to refer to previous arguments, it is substituted for the actual type on evaluation.
 
 ```
 > func: baz(x y Int z 0)
@@ -146,16 +152,7 @@ The ```func:``` macro may be used to define named functions. Several implementat
 ```
 
 ### Coroutines
-Coroutines allow stopping and resuming execution. A coroutine context is returned on first yield, and ```call```-ing it picks up the trail from previous ```yield```.
-
-```
-> 1 2 yield 3
-..
-[1 2 Coro(0x540a0d0:1)]
-> call
-..
-[1 2 3]
-````
+Coroutines allow stopping execution and resuming in the same scope later on. A coroutine context is returned on first yield, and ```call```-ing it picks up the trail from previous ```yield```.
 
 ```
 > (1 2 yield 3)
@@ -172,6 +169,8 @@ Error in row 1, col 5:
 Coro is done
 ```
 
+Since functions open implicit scopes, yielding works the same way as for explicit scopes.
+
 ```
 > func: foo()
 ..  1 2 yield 3;
@@ -179,6 +178,20 @@ Coro is done
 ..
 [2 3]
 ```
+
+Yielding from main also works. In the example below, ```foo``` is able to clear the main stack by calling the passed in coro. 
+
+```
+> 1 2 yield cls 3 4
+..
+[1 2 Coro(0x541ec00:1)]
+> func: foo(x Coro) $x call;          
+..
+[1 2 Coro(0x541ec00:1)]
+> foo
+..
+[3 4]
+````
 
 ### License
 GPLv3

@@ -56,7 +56,7 @@ static void func_tests() {
 
   run(&cx, "func: foo() 42; foo = 42 test");
   run(&cx, "func: foo() 42; &foo call = 42 test");
-  run(&cx, "func: bar(x Int) $x + 35; bar 7 42 = test");
+  run(&cx, "func: bar(x A) $x + 35; bar 7 42 = test");
   run(&cx, "func: baz(x y Int z 0) $x + $y + $z; baz 1 3 5 9 = test");
 
   cx_deinit(&cx);
@@ -71,6 +71,7 @@ static void coro_tests() {
   run(&cx, "func: foo() 1 2 yield 3; foo call + 5 = test");
   run(&cx, "(let: x 42; yield $x) call 42 = test");
   run(&cx, "(let: x 42; (yield $x)) call 42 = test");
+
   //run(&cx, "(if true {1 yield 2} {} 3) call");
   
   cx_deinit(&cx);
