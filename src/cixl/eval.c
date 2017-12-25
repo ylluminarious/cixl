@@ -93,6 +93,7 @@ ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
 ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   cx_ok(toks->count);
   struct cx_tok *t = cx_vec_get(toks, pc);
+
   cx->row = t->row;
   cx->col = t->col;
   

@@ -43,13 +43,14 @@ struct cx_tok *cx_tok_deinit(struct cx_tok *tok) {
 }
 
 void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src) {
+  dst->row = src->row;
+  dst->col = src->col;
   dst->type = src->type;
   
   switch (src->type) {
   case CX_TGROUP:
   case CX_TLAMBDA: {
-    struct cx_vec *body = cx_vec_init(malloc(sizeof(struct cx_vec)),
-				      sizeof(struct cx_tok));
+    struct cx_vec *body = cx_vec_new(sizeof(struct cx_tok));
     
     cx_do_vec((struct cx_vec *)src->data, struct cx_tok, t) {
       cx_tok_copy(cx_vec_push(body), t);

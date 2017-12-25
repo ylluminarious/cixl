@@ -192,7 +192,7 @@ Since functions open implicit scopes, yielding works the same way as for explici
 [2 3]
 ```
 
-Yielding from a lambda inherits the scope that defined the lambda.
+Yielding from a lambda inherits the lambda definition scope.
 
 ```
 > (let: x 42; {yield $x}) call
