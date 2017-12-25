@@ -183,6 +183,21 @@ Since functions open implicit scopes, yielding works the same way as for explici
 [2 3]
 ```
 
+Since lambdas are executed in the calling scope, yielding from one will bind the coro to the scope that called the lambda.
+
+```
+> {yield $y}
+..func: foo(x Lambda)
+..  let: y 42;
+..  $x call;
+..foo
+..
+[Coro(0x54671b0:1)]
+
+> call
+[42]
+```
+
 Yielding from main also works. In the example below, ```foo``` is able to clear the main stack by calling the passed in coro. 
 
 ```
