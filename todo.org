@@ -3,7 +3,7 @@
 ** forced tail call
 ** fib
 * add clock fn
-** measure time for lambda and push nsecs
+** measure time for call and push nsecs
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type

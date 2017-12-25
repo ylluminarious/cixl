@@ -204,7 +204,7 @@ Yielding from a lambda inherits the lambda definition scope.
 [42]
 ```
 
-Yielding from main also works. In the example below, ```foo``` is able to clear the main stack by calling the passed in coro. 
+Yielding from main also works. In the example below, ```foo``` is able to clear the main stack by calling the passed in coroutine. 
 
 ```
 > 1 2 yield cls 3 4
