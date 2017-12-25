@@ -1,13 +1,4 @@
-* change cx_scope to use ref counting
-** add nrefs
-*** inc for child scopes
-*** dec instead of deinit
-
-* change lambda init/deinit to new/ref/unref
-* change coro init/deinit to new/ref/unref
-
 * goto/labels/lambda conv
-
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
@@ -19,6 +10,8 @@
 ** push func
 ** add func_type
 ** move call fn to func.c
+* change lambda init/deinit to new/ref/unref
+* change coro init/deinit to new/ref/unref
 * add Vec type
 ** add [] support
 ** add nrefs to Vec type like lambda

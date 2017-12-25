@@ -15,12 +15,12 @@ struct cx_scope {
   struct cx_vec stack;
   struct cx_set env;
   struct cx_vec toks;
+  int nrefs;
 };
 
-struct cx_scope *cx_scope_init(struct cx_scope *scope,
-			       struct cx *cx,
-			       struct cx_scope *parent);
-struct cx_scope *cx_scope_deinit(struct cx_scope *scope);
+struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent);
+struct cx_scope *cx_scope_ref(struct cx_scope *scope);
+void cx_scope_unref(struct cx_scope *scope);
 
 struct cx_box *cx_push(struct cx_scope *scope);
 struct cx_box *cx_pop(struct cx_scope *scope, bool silent);

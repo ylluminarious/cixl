@@ -16,7 +16,7 @@ struct cx_coro *cx_coro_init(struct cx_coro *coro, struct cx_scope *scope) {
 }
 
 struct cx_coro *cx_coro_deinit(struct cx_coro *coro) {
-  free(cx_scope_deinit(coro->scope));
+  cx_scope_unref(coro->scope);
   return coro;
 }
 

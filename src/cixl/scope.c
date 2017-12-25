@@ -6,11 +6,10 @@
 #include "cixl/tok.h"
 #include "cixl/var.h"
 
-struct cx_scope *cx_scope_init(struct cx_scope *scope,
-			       struct cx *cx,
-			       struct cx_scope *parent) {
+struct cx_scope *cx_scope_new(struct cx *cx, struct cx_scope *parent) {
+  struct cx_scope *scope = malloc(sizeof(struct cx_scope));
   scope->cx = cx;
-  scope->parent = parent;
+  scope->parent = parent ? cx_scope_ref(parent) : NULL;
   scope->coro = NULL;
   cx_vec_init(&scope->stack, sizeof(struct cx_box));
 
@@ -18,21 +17,31 @@ struct cx_scope *cx_scope_init(struct cx_scope *scope,
   scope->env.key_offset = offsetof(struct cx_var, id);
 
   cx_vec_init(&scope->toks, sizeof(struct cx_tok));
-  
+  scope->nrefs = 1;
   return scope;
 }
 
-struct cx_scope *cx_scope_deinit(struct cx_scope *scope) {
-  cx_do_vec(&scope->stack, struct cx_box, b) { cx_box_deinit(b); }
-  cx_vec_deinit(&scope->stack);
-
-  cx_do_set(&scope->env, struct cx_var, v) { cx_var_deinit(v); }
-  cx_set_deinit(&scope->env);
-
-  cx_do_vec(&scope->toks, struct cx_tok, t) { cx_tok_deinit(t); }
-  cx_vec_deinit(&scope->toks);
-
+struct cx_scope *cx_scope_ref(struct cx_scope *scope) {
+  scope->nrefs++;
   return scope;
+}
+
+void cx_scope_unref(struct cx_scope *scope) {
+  scope->nrefs--;
+  
+  if (!scope->nrefs) {
+    cx_do_vec(&scope->stack, struct cx_box, b) { cx_box_deinit(b); }
+    cx_vec_deinit(&scope->stack);
+    
+    cx_do_set(&scope->env, struct cx_var, v) { cx_var_deinit(v); }
+    cx_set_deinit(&scope->env);
+
+    cx_do_vec(&scope->toks, struct cx_tok, t) { cx_tok_deinit(t); }
+    cx_vec_deinit(&scope->toks);
+
+    if (scope->parent) { cx_scope_unref(scope->parent); }
+    free(scope);
+  }
 }
 
 struct cx_box *cx_push(struct cx_scope *scope) {
@@ -85,9 +94,15 @@ struct cx_box *cx_set(struct cx_scope *scope, const char *id) {
 struct cx_box *cx_get(struct cx_scope *scope, const char *id, bool silent) {
   struct cx_var *var = cx_set_get(&scope->env, &id);
 
-  if (!var && !silent) {
-    cx_error(scope->cx, scope->cx->row, scope->cx->col, "Unknown variable: '%s'", id);
-    return scope->parent ? cx_get(scope->parent, id, silent) : NULL;
+  if (!var) {
+    if (scope->parent) { return cx_get(scope->parent, id, silent); }
+
+    if (!silent) {
+      cx_error(scope->cx, scope->cx->row, scope->cx->col,
+	       "Unknown variable: '%s'", id);
+    }
+    
+    return NULL;
   }
 
   return &var->value;

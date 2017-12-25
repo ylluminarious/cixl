@@ -238,7 +238,7 @@ struct cx *cx_init(struct cx *cx) {
 struct cx *cx_deinit(struct cx *cx) {
   cx_set_deinit(&cx->separators);
   
-  cx_do_vec(&cx->scopes, struct cx_scope *, s) { free(cx_scope_deinit(*s)); }
+  cx_do_vec(&cx->scopes, struct cx_scope *, s) { cx_scope_unref(*s); }
   cx_vec_deinit(&cx->scopes);
 
   cx_do_set(&cx->types, struct cx_type *, t) { free(cx_type_deinit(*t)); }
@@ -373,14 +373,12 @@ struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
 
 
 struct cx_scope *cx_begin(struct cx *cx, bool child) {
-  struct cx_scope *s = cx_scope_init(malloc(sizeof(struct cx_scope)),
-				     cx,
-				     child ? cx_scope(cx, 0) : NULL);
+  struct cx_scope *s = cx_scope_new(cx, child ? cx_scope(cx, 0) : NULL);
   cx_push_scope(cx, s);
   return s;
 }
 
 void cx_end(struct cx *cx) {
   struct cx_scope *s = cx_pop_scope(cx, false);
-  if (cx) { free(cx_scope_deinit(s)); }
+  if (cx) { cx_scope_unref(s); }
 }
