@@ -4,6 +4,10 @@
 #include "cixl/error.h"
 #include "cixl/vec.h"
 
+struct cx_vec *cx_vec_new(size_t item_size) {
+  return cx_vec_init(malloc(sizeof(struct cx_vec)), item_size);
+}
+
 struct cx_vec *cx_vec_init(struct cx_vec *vec, size_t item_size) {
   vec->item_size = item_size;
   vec->count = vec->capac = 0;

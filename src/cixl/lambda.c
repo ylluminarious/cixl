@@ -8,20 +8,38 @@
 #include "cixl/scope.h"
 #include "cixl/tok.h"
 
-struct cx_lambda *cx_lambda_init(struct cx_lambda *lambda) {
-  cx_vec_init(&lambda->body, sizeof(struct cx_tok));
+struct cx_lambda *cx_lambda_init(struct cx_lambda *lambda,
+				 struct cx_scope *scope,
+				 struct cx_vec *body) {
+  lambda->scope = cx_scope_ref(scope);
   lambda->nrefs = 1;
+  cx_vec_init(&lambda->body, sizeof(struct cx_tok));
+  
+  cx_do_vec(body, struct cx_tok, t) {
+    cx_tok_copy(cx_vec_push(&lambda->body), t);
+  }
+  
   return lambda;
 }
 
 struct cx_lambda *cx_lambda_deinit(struct cx_lambda *lambda) {
   cx_do_vec(&lambda->body, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&lambda->body);
+  cx_scope_unref(lambda->scope);
   return lambda;
 }
 
 static bool call(struct cx_box *value, struct cx_scope *scope) {
-  return cx_eval(scope->cx, &value->as_lambda->body, 0);
+  struct cx *cx = scope->cx;
+  struct cx_lambda *l = value->as_lambda;
+  cx_push_scope(cx, l->scope); 
+  bool ok = cx_eval(cx, &l->body, 0);
+
+  if (cx->scopes.count > 1 && cx_scope(cx, 0) == l->scope) {
+    cx_pop_scope(cx, false);
+  }
+  
+  return ok;
 }
 
 static void fprint(struct cx_box *value, FILE *out) { 

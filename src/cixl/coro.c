@@ -38,6 +38,8 @@ static void yield_imp(struct cx_scope *scope) {
   if (cx->coro) {
     cx->coro->pc = cx->pc+1;    
   } else {
+    cx_scope_ref(scope);
+    
     struct cx_coro *coro = cx_coro_init(malloc(sizeof(struct cx_coro)),
 					cx,
 					cx_pop_scope(cx, true));

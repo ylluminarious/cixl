@@ -356,7 +356,7 @@ struct cx_scope *cx_scope(struct cx *cx, size_t i) {
 }
 
 void cx_push_scope(struct cx *cx, struct cx_scope *scope) {
-  *(struct cx_scope **)cx_vec_push(&cx->scopes) = scope;
+  *(struct cx_scope **)cx_vec_push(&cx->scopes) = cx_scope_ref(scope);
 }
 
 struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
@@ -372,6 +372,7 @@ struct cx_scope *cx_pop_scope(struct cx *cx, bool silent) {
     *cx_push(cx_scope(cx, 0)) = *v;   
   }
 
+  cx_scope_unref(s);
   return s;
 }
 
@@ -382,6 +383,5 @@ struct cx_scope *cx_begin(struct cx *cx, bool child) {
 }
 
 void cx_end(struct cx *cx) {
-  struct cx_scope *s = cx_pop_scope(cx, false);
-  if (s) { cx_scope_unref(s); }
+  cx_pop_scope(cx, false);
 }

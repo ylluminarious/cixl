@@ -7,6 +7,7 @@
 #include "cixl/eval.h"
 #include "cixl/error.h"
 #include "cixl/func.h"
+#include "cixl/lambda.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/vec.h"
@@ -46,6 +47,19 @@ ssize_t cx_eval_macro(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   struct cx_tok *t = cx_vec_get(toks, pc);
   struct cx_macro_eval *eval = t->data;
   return eval->imp(eval, cx, toks, pc);
+}
+
+ssize_t cx_eval_lambda(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
+  struct cx_tok *t = cx_vec_get(toks, pc);
+  struct cx_scope *scope = cx_scope(cx, 0);
+  
+  struct cx_lambda *lambda = cx_lambda_init(malloc(sizeof(struct cx_lambda)),
+					    scope,
+					    t->data);
+
+  struct cx_box *v = cx_box_init(cx_push(scope), cx->lambda_type);
+  v->as_lambda = lambda;
+  return pc+1;
 }
 
 ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
@@ -89,6 +103,8 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
     return cx_eval_group(cx, toks, pc);
   case CX_TID:
     return cx_eval_id(cx, toks, pc);
+  case CX_TLAMBDA:
+    return cx_eval_lambda(cx, toks, pc);
   case CX_TLITERAL:
     return cx_eval_literal(cx, toks, pc);
   case CX_TMACRO:

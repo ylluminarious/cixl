@@ -82,7 +82,7 @@ Named variables may be bound once per scope using the ```let:``` macro.
 ```
 
 ### Lambdas
-Braces quote contained code, which is then pushed on the stack.
+Putting braces around a block of code defines a lambda, which is then pushed on the stack.
 
 ```
 > {1 2 3}
@@ -93,6 +93,15 @@ Braces quote contained code, which is then pushed on the stack.
 ..
 [1 2 3]
 ```
+
+Lambdas inherit the defining scope.
+
+```
+> (let: x 42; {$x}) call
+..
+[42]
+```
+
 
 ### Scopes
 Enclosing code in parens evaluates in a separate scope/stack. The last value on the stack is automatically returned on scope exit.
@@ -183,18 +192,15 @@ Since functions open implicit scopes, yielding works the same way as for explici
 [2 3]
 ```
 
-Since lambdas are executed in the calling scope, yielding from one will bind the coro to the scope that called the lambda.
+Yielding from a lambda inherits the scope that defined the lambda.
 
 ```
-> {yield $y}
-..func: foo(x Lambda)
-..  let: y 42;
-..  $x call;
-..foo
+> (let: x 42; {yield $x}) call
 ..
-[Coro(0x54671b0:1)]
+[Coro(0x5476c50:1)]
 
 > call
+..
 [42]
 ```
 

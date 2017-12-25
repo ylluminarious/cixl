@@ -19,7 +19,8 @@ struct cx_tok *cx_tok_init(struct cx_tok *tok,
 
 struct cx_tok *cx_tok_deinit(struct cx_tok *tok) {
   switch (tok->type) {
-  case CX_TGROUP: {
+  case CX_TGROUP:
+  case CX_TLAMBDA: {
     struct cx_vec *body = tok->data;
     cx_do_vec(body, struct cx_tok, t) { cx_tok_deinit(t); }
     free(cx_vec_deinit(body));
@@ -45,7 +46,8 @@ void cx_tok_copy(struct cx_tok *dst, struct cx_tok *src) {
   dst->type = src->type;
   
   switch (src->type) {
-  case CX_TGROUP: {
+  case CX_TGROUP:
+  case CX_TLAMBDA: {
     struct cx_vec *body = cx_vec_init(malloc(sizeof(struct cx_vec)),
 				      sizeof(struct cx_tok));
     

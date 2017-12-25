@@ -143,24 +143,24 @@ bool cx_parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 
 bool cx_parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   int row = cx->row, col = cx->col;
-  struct cx_lambda *lambda = cx_lambda_init(malloc(sizeof(struct cx_lambda)));
+  struct cx_vec *body = cx_vec_new(sizeof(struct cx_tok));
   
   while (true) {
-    if (!cx_parse_tok(cx, in, &lambda->body, lookup)) {
-      free(cx_lambda_deinit(lambda));
+    if (!cx_parse_tok(cx, in, body, lookup)) {
+      cx_do_vec(body, struct cx_tok, t) { cx_tok_deinit(t); }
+      free(cx_vec_deinit(body));
       return false;
     }
 
-    struct cx_tok *tok = cx_vec_peek(&lambda->body, 0);
+    struct cx_tok *tok = cx_vec_peek(body, 0);
+    
     if (tok->type == CX_TUNLAMBDA) {
-      cx_tok_deinit(cx_vec_pop(&lambda->body));
+      cx_tok_deinit(cx_vec_pop(body));
       break;
     }
   }
 
-  struct cx_box *box = cx_box_new(cx->lambda_type);
-  box->as_lambda = lambda;
-  cx_tok_init(cx_vec_push(out), CX_TLITERAL, box, row, col);
+  cx_tok_init(cx_vec_push(out), CX_TLAMBDA, body, row, col);
   return true;
 }
 
