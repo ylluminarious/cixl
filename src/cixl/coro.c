@@ -11,15 +11,13 @@ struct cx_coro *cx_coro_init(struct cx_coro *coro,
 			     struct cx *cx,
 			     struct cx_scope *scope) {
   coro->scope = scope;
-
-  cx_vec_init(&coro->toks, sizeof(struct cx_tok));
-  coro->pc = cx->pc+1;
-
+  coro->pc = 0;
   coro->nrefs = 1;
   coro->done = false;
+  cx_vec_init(&coro->toks, sizeof(struct cx_tok));
 
-  cx_do_vec(cx_ok(cx->toks), struct cx_tok, t) {
-    cx_tok_copy(cx_vec_push(&coro->toks), t);
+  for (size_t i = cx->pc+1; i < cx->toks->count; i++) {
+    cx_tok_copy(cx_vec_push(&coro->toks), cx_vec_get(cx->toks, i));
   }
   
   return coro;
