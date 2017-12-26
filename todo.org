@@ -6,13 +6,12 @@
 ** add [] support
 ** add nrefs to Vec type like lambda
 ** add push fn
-* add stash/splat funcs
+** add stash/splat funcs
+* add parse/eval
 * add Rat type
 * add Opt type
 ** add Vec pop fn
-* add parse/eval
 * jit func tokens to imps
 ** add CX_TFUNC_IMP
 *** add func ref to imp struct
-* change lambda init/deinit to new/ref/unref
-* change coro init/deinit to new/ref/unref
+
