@@ -3,7 +3,7 @@
 ## cixl
 #### a minimal scripting language
 
-This project aims to produce a minimalistic scripting language, or DSL substrate; in C. In a way, it's Lua taken one step further down the path of simplicity. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on simplicity, transparency and flexibility.
+This project aims to produce a minimal scripting language, or DSL substrate; in C. In a way, it's Lua taken one step further down the path of simplicity. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on simplicity, transparency and flexibility.
 
 ### Status
 Examples from this document should work without a hitch and run clean in ```valgrind```, outside of that I can't really promise much at the moment. Current work is focused on tracing interactions between core features; as soon as I gain enough confidence that I've steered clear of major disasters, I'll start filling in obvious gaps in functionality.
@@ -219,7 +219,7 @@ Several parameters may share the same type. An index may may be specified instea
 ```
 
 ### Coroutines
-Coroutines allow stopping execution and resuming in the same scope later on. A coroutine context is returned on first yield, and ```call```-ing it picks up the trail from previous ```yield```.
+Coroutines allow stopping execution and resuming in the same scope later on. A coroutine context is returned on first ```yield```, and ```call```-ing it picks up the trail from previous ```yield```.
 
 ```
 > (1 2 yield 3)
@@ -236,7 +236,7 @@ Error in row 1, col 5:
 Coro is done
 ```
 
-Since functions open implicit scopes, yielding works the same way as for explicit scopes.
+Functions work more or less the same way:
 
 ```
 > func: foo()
@@ -246,7 +246,7 @@ Since functions open implicit scopes, yielding works the same way as for explici
 [3]
 ```
 
-Yielding from a lambda inherits the lambda definition scope.
+As do lambdas, except for using the defining scope:
 
 ```
 > (let: x 42; {yield $x}) call
@@ -258,7 +258,7 @@ Yielding from a lambda inherits the lambda definition scope.
 [42]
 ```
 
-Yielding from main also works. In the example below, ```foo``` manipulates the main stack through the passed in coroutine.
+In the example below, ```foo``` manipulates the main stack through the passed in coroutine.
 
 ```
 > 1 2 yield cls 3 4
