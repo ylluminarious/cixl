@@ -129,13 +129,16 @@ bool cx_funcall(struct cx_func *func, struct cx_scope *scope, int row, int col) 
 
   if (imp->ptr) {
     imp->ptr(scope);
-  } else {
-    struct cx_scope *func_scope = cx_begin(cx, false);
-    if (!cx_eval(cx, &imp->toks, 0)) { return false; }
-    if (cx_scope(cx, 0) == func_scope) { cx_end(cx); }
+    return true;
   }
-
-  return true;
+  
+  struct cx_scope *func_scope = cx_begin(cx, false);
+  struct cx_func_imp *prev = cx->func_imp;
+  cx->func_imp = imp;
+  bool ok = cx_eval(cx, &imp->toks, 0);
+  cx->func_imp = prev;
+  if (cx_scope(cx, 0) == func_scope) { cx_end(cx); }
+  return ok;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {

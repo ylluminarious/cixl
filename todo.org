@@ -1,12 +1,11 @@
 * add if fn
-* add recall
-** call imp in same scope
-** fib
+* add fib
 * add clock fn
 ** measure time for call and push nsecs
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
+* change func imps to return bool
 * add Vec type
 ** add [] support
 ** add nrefs to Vec type like lambda

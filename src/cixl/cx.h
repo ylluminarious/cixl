@@ -29,6 +29,7 @@ struct cx {
   struct cx_scope *main;
   
   struct cx_coro *coro;
+  struct cx_func_imp *func_imp;
   struct cx_vec *toks;
   ssize_t pc, stop_pc;
   

@@ -207,6 +207,17 @@ static void call_imp(struct cx_scope *scope) {
   cx_box_deinit(&x);
 }
 
+static void recall_imp(struct cx_scope *scope) {
+  struct cx *cx = scope->cx;
+  
+  if (!cx->func_imp) {
+    cx_error(cx, cx->row, cx->col, "Nothing to recall");
+    return;
+  }
+
+  cx_eval(cx, &cx->func_imp->toks, 0); 
+}
+
 static void test_imp(struct cx_scope *scope) {
   struct cx_box x = *cx_ok(cx_pop(scope, false));
   struct cx *cx = scope->cx;
@@ -218,6 +229,7 @@ static void test_imp(struct cx_scope *scope) {
 
 struct cx *cx_init(struct cx *cx) {
   cx->coro = NULL;
+  cx->func_imp = NULL;
   cx->toks = NULL;
   cx->pc = cx->stop_pc = -1;  
   cx->row = cx->col = -1;
@@ -258,6 +270,8 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "==", cx_arg(cx->any_type), cx_narg(0))->ptr = equid_imp;
 
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
+  cx_add_func(cx, "recall")->ptr = recall_imp;
+
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
   cx->main = cx_begin(cx, false);
