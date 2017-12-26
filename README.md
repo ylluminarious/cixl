@@ -30,25 +30,6 @@ Press Return twice to eval input.
 > quit
 ```
 
-### Types
-Any name that starts with an uppercase letter is treated as a type reference. The following types are defined out of the box (with parent types in parens):
-
-- A
-- Bool (A)
-- Coro (A)
-- Func (A)
-- Int  (A)
-- Lambda (A)
-- Type (A)
-
-```
-> type 42
-[Int]
-
-> is A
-[t]
-```
-
 ### Stack
 The parameter stack is exposed to user code, just like in Forth.
 
@@ -85,6 +66,25 @@ But unlike Forth, functions scan forward until enough arguments are on the stack
 > + +
 ..
 [9]
+```
+
+### Types
+Any name that starts with an uppercase letter is treated as a type reference. The following types are defined out of the box (with parent types in parens):
+
+- A
+- Bool (A)
+- Coro (A)
+- Func (A)
+- Int  (A)
+- Lambda (A)
+- Type (A)
+
+```
+> type 42
+[Int]
+
+> is A
+[t]
 ```
 
 ### Variables
