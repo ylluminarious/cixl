@@ -133,12 +133,12 @@ bool cx_funcall(struct cx_func *func, struct cx_scope *scope, int row, int col) 
     return true;
   }
   
-  struct cx_scope *func_scope = cx_begin(cx, false);
+  cx_begin(cx, false);
   struct cx_func_imp *prev = cx->func_imp;
   cx->func_imp = imp;
   bool ok = cx_eval(cx, &imp->toks, 0);
   cx->func_imp = prev;
-  if (cx_scope(cx, 0) == func_scope) { cx_end(cx); }
+  cx_end(cx);
   return ok;
 }
 

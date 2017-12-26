@@ -84,10 +84,10 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
 ssize_t cx_eval_group(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   struct cx_tok *t = cx_vec_get(toks, pc);
   struct cx_vec *body = t->data;
-  struct cx_scope *s = cx_begin(cx, true);
-  if (!cx_eval(cx, body, 0)) { return -1; }
-  if (cx_scope(cx, 0) == s) { cx_end(cx); }
-  return pc+1;
+  cx_begin(cx, true);
+  bool ok = cx_eval(cx, body, 0);
+  cx_end(cx);
+  return ok ? pc+1 : -1;
 }
 
 ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {

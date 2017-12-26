@@ -10,7 +10,7 @@
 struct cx_coro *cx_coro_init(struct cx_coro *coro,
 			     struct cx *cx,
 			     struct cx_scope *scope) {
-  coro->scope = scope;
+  coro->scope = cx_scope_ref(scope);
   coro->pc = 0;
   coro->nrefs = 1;
   coro->done = false;
@@ -24,7 +24,7 @@ struct cx_coro *cx_coro_init(struct cx_coro *coro,
 }
 
 struct cx_coro *cx_coro_deinit(struct cx_coro *coro) {
-  if (coro->scope) { cx_scope_unref(coro->scope); }
+  cx_scope_unref(coro->scope);
 
   cx_do_vec(&coro->toks, struct cx_tok, t) { cx_tok_deinit(t); }
   cx_vec_deinit(&coro->toks);
@@ -38,13 +38,11 @@ static void yield_imp(struct cx_scope *scope) {
   if (cx->coro) {
     cx->coro->pc = cx->pc+1;    
   } else {
-    cx_scope_ref(scope);
-    
     struct cx_coro *coro = cx_coro_init(malloc(sizeof(struct cx_coro)),
 					cx,
-					cx_pop_scope(cx, true));
+					scope);
 
-    cx_box_init(cx_push(cx_scope(cx, 0)), cx->coro_type)->as_ptr = coro;
+    cx_box_init(cx_push(scope), cx->coro_type)->as_ptr = coro;
   }
   
   cx->stop_pc = cx->pc+1;
@@ -62,11 +60,12 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
     cx_error(cx, cx->row, cx->col, "Coro is done");
     return false;
   }
-    
-  if (coro->scope) {
+
+  bool pop_scope = false;
+  
+  if (scope != coro->scope) {
     cx_push_scope(cx, coro->scope);
-  } else {
-    cx_push_scope(cx, cx->main);
+    pop_scope = true;
   }
   
   cx->coro = coro;
@@ -75,7 +74,7 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   if (!ok) { return false; }
   coro->pc = cx->pc;
   if (coro->pc == coro->toks.count) { coro->done = true; }
-  cx_pop_scope(cx, false);
+  if (pop_scope) { cx_pop_scope(cx, false); }
   return true;
 }
 

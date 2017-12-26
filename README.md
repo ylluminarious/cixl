@@ -224,11 +224,11 @@ Coroutines allow stopping execution and resuming in the same scope later on. A c
 ```
 > (1 2 yield 3)
 ..
-[2 Coro(0x53c9de0:1)]
+[Coro(0x53c9de0:1)]
 
 > dup call
 ..
-[2 Coro(0x53c9de0:1) 3]
+[Coro(0x53c9de0:1) 3]
 
 > zap call
 ..
@@ -243,7 +243,7 @@ Since functions open implicit scopes, yielding works the same way as for explici
 ..  1 2 yield 3;
 ..foo call
 ..
-[2 3]
+[3]
 ```
 
 Yielding from a lambda inherits the lambda definition scope.
