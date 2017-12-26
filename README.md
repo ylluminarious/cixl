@@ -69,7 +69,7 @@ But unlike Forth, functions scan forward until enough arguments are on the stack
 ```
 
 ### Types
-Any name that starts with an uppercase letter is treated as a type reference. The following types are defined out of the box:
+Names that start with an uppercase letter are treated as type references. The following types are defined out of the box:
 
 - A
 - Bool
@@ -89,7 +89,7 @@ Any name that starts with an uppercase letter is treated as a type reference. Th
 ```
 
 ### Variables
-Named variables may be bound once per scope using the ```let:``` macro.
+Named variables may be defined once per scope using the ```let:``` macro.
 
 ```
 > let: foo 42;
@@ -188,7 +188,7 @@ Prefixing a function name with ```&``` pushes a reference on the stack.
 [42]
 ```
 
-Each argument needs a type, ```A``` may be used to allow any type.
+Each argument needs a type, ```A``` may be used to accept any type.
 
 ```
 > func: bar(x A) $x + 35;
@@ -219,7 +219,7 @@ Several parameters may share the same type. An index may may be specified instea
 ```
 
 ### Coroutines
-Coroutines allow stopping execution and resuming in the same scope later on. A coroutine context is returned on first ```yield```, and ```call```-ing it picks up the trail from previous ```yield```.
+Coroutines allow stopping execution and resuming in the same scope later on. A coroutine context is returned on first ```yield```, ```call```-ing it resumes execution.
 
 ```
 > (1 2 yield 3)
@@ -246,7 +246,7 @@ Functions work more or less the same way:
 [3]
 ```
 
-As do lambdas, except for using the defining scope:
+As do lambdas, except for reusing the defining scope:
 
 ```
 > (let: x 42; {yield $x}) call
