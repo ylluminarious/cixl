@@ -250,9 +250,11 @@ Yielding from main also works. In the example below, ```foo``` is able to clear 
 > 1 2 yield cls 3 4
 ..
 [1 2 Coro(0x541ec00:1)]
+
 > func: foo(x Coro) $x call;          
 ..
 [1 2 Coro(0x541ec00:1)]
+
 > foo
 ..
 [3 4]
