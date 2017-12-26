@@ -69,16 +69,16 @@ But unlike Forth, functions scan forward until enough arguments are on the stack
 ```
 
 ### Types
-Any name that starts with an uppercase letter is treated as a type reference. The following types are defined out of the box (with parent types in parens):
+Any name that starts with an uppercase letter is treated as a type reference. The following types are defined out of the box:
 
 - A
-- Bool (A)
-- Coro (A)
-- Func (A)
-- Int  (A)
-- Lambda (A)
-- Str (A)
-- Type (A)
+- Bool
+- Coro
+- Func
+- Int
+- Lambda
+- Str
+- Type
 
 ```
 > type 42
