@@ -26,6 +26,7 @@ struct cx_func_imp {
 
 struct cx_func_imp *cx_func_imp_init(struct cx_func_imp *imp, char *id);
 struct cx_func_imp *cx_func_imp_deinit(struct cx_func_imp *imp);
+bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack);
 
 struct cx_func_arg {
   struct cx_type *type;

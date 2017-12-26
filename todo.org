@@ -1,9 +1,12 @@
+* extract bool cx_func_imp_check(imp, stack) from func_get_imp
+** call in recall_imp
+** signal error if false
 * add if fn
 ** add recall test
-** add recall example to readme
-* add fib
+** add fib recall example to readme
 * add clock fn
 ** measure time for call and push nsecs
+** compare fib
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
@@ -22,4 +25,3 @@
 *** add func ref to imp struct
 * change lambda init/deinit to new/ref/unref
 * change coro init/deinit to new/ref/unref
-* add struct: macro

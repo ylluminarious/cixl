@@ -45,11 +45,11 @@ static ssize_t let_eval(struct cx_macro_eval *eval,
   }
 
   struct cx_tok *id = cx_vec_get(&eval->toks, 0);
-  struct cx_box *var = cx_set(s->parent, id->data);
-  *var = *val;
+  struct cx_box *var = cx_set(s->parent, id->data, false);
+  if (var) { *var = *val; }
   cx_end(cx);
   
-  return pc+1;
+  return var ? pc+1 : -1;
 }
 
 static bool let_parse(struct cx *cx, FILE *in, struct cx_vec *out) {
@@ -90,7 +90,7 @@ static ssize_t func_eval(struct cx_macro_eval *eval,
 
   for (int j = eval->toks.count-1; j >= 0; j--) {
     struct cx_tok *t = cx_vec_get(&eval->toks, j);
-    *cx_set(s, t->data) = *cx_pop(ps, false);
+    *cx_set(s, t->data, true) = *cx_pop(ps, false);
   }
   
   return pc+1;
@@ -215,6 +215,11 @@ static void recall_imp(struct cx_scope *scope) {
     return;
   }
 
+  if (!cx_func_imp_match(cx->func_imp, &scope->stack)) {
+    cx_error(cx, cx->row, cx->col, "Recall not applicable");
+    return;
+  }
+  
   cx_eval(cx, &cx->func_imp->toks, 0); 
 }
 

@@ -91,28 +91,29 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
   return imp;
 }
 
-struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) {
-  cx_do_set(&func->imps, struct cx_func_imp *, imp) {
-    bool match = true;
-    
-    for (int i=func->nargs-1, j=stack->count-1;
-	 i >= 0 && j >= 0;
-	 i--, j--) {
-      struct cx_func_arg *imp_arg = cx_vec_get(&(*imp)->args, i);
+bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack) {
+    for (int i = 0, j = stack->count-1;
+	 i < imp->args.count && j >= 0;
+	 i++, j--) {
+      struct cx_func_arg *imp_arg = cx_vec_get(&imp->args, i);
 
       struct cx_type *imp_type = imp_arg->type
 	? imp_arg->type
-	: ((struct cx_box *)cx_vec_get(stack, imp_arg->narg))->type;
+	: ((struct cx_box *)cx_vec_get(stack,
+				       stack->count -
+				       imp->args.count +
+				       imp_arg->narg))->type;
       
       struct cx_box *arg = cx_vec_get(stack, j);
-      
-      if (!cx_type_is(arg->type, imp_type)) {
-	match = false;
-	break;
-      }
-    }
+      if (!cx_type_is(arg->type, imp_type)) { return false; }
+    }  
 
-    if (match) { return *imp; }
+    return true;
+}
+
+struct cx_func_imp *cx_func_get_imp(struct cx_func *func, struct cx_vec *stack) {
+  cx_do_set(&func->imps, struct cx_func_imp *, imp) {
+    if (cx_func_imp_match(*imp, stack)) { return *imp; }
   }
 
   return NULL;
