@@ -1,6 +1,9 @@
 * add times fn
+** 10 times {...}
 ** call arg n times with i pushed
-** 10 times {}
+* add clock fn
+** clock {...}
+** return duration for call in ns
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
