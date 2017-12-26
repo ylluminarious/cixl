@@ -21,7 +21,7 @@ ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
     if (!type) { return -1; }
     struct cx_box *box = cx_push(cx_scope(cx, 0));
     box->type = cx->meta_type;
-    box->as_type = type;
+    box->as_ptr = type;
   } else {
     if (id[0] == '$') {
       struct cx_scope *s = cx_scope(cx, 0);
@@ -58,7 +58,7 @@ ssize_t cx_eval_lambda(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
 					    t->data);
 
   struct cx_box *v = cx_box_init(cx_push(scope), cx->lambda_type);
-  v->as_lambda = lambda;
+  v->as_ptr = lambda;
   return pc+1;
 }
 

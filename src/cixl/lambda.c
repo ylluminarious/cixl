@@ -30,12 +30,12 @@ struct cx_lambda *cx_lambda_deinit(struct cx_lambda *lambda) {
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
-  return x->as_lambda == y->as_lambda;
+  return x->as_ptr == y->as_ptr;
 }
 
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  struct cx_lambda *l = value->as_lambda;
+  struct cx_lambda *l = value->as_ptr;
   cx_push_scope(cx, l->scope); 
   bool ok = cx_eval(cx, &l->body, 0);
 
@@ -47,17 +47,18 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
 }
 
 static void copy_imp(struct cx_box *dst, struct cx_box *src) {
-  struct cx_lambda *l = src->as_lambda;
-  dst->as_lambda = l;
+  struct cx_lambda *l = src->as_ptr;
+  dst->as_ptr = l;
   l->nrefs++;
 }
 
-static void fprint_imp(struct cx_box *value, FILE *out) { 
-  fprintf(out, "Lambda(%p:%d)", value->as_lambda, value->as_lambda->nrefs);
+static void fprint_imp(struct cx_box *value, FILE *out) {
+  struct cx_lambda *l = value->as_ptr;
+  fprintf(out, "Lambda(%p:%d)", l, l->nrefs);
 }
 
 static void deinit_imp(struct cx_box *value) {
-  struct cx_lambda *l = value->as_lambda;
+  struct cx_lambda *l = value->as_ptr;
   cx_ok(l->nrefs > 0);
   l->nrefs--;
   if (!l->nrefs) { free(cx_lambda_deinit(l)); }

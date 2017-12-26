@@ -1,7 +1,3 @@
-* add type->eqval/equid
-** eqval defaults to equid
-** change = to call eqval
-** add == for equid
 * add str support
 ** dup on box copy
 ** add ? func (!= 0)

@@ -44,19 +44,19 @@ static void yield_imp(struct cx_scope *scope) {
 					cx,
 					cx_pop_scope(cx, true));
 
-    cx_box_init(cx_push(cx_scope(cx, 0)), cx->coro_type)->as_coro = coro;
+    cx_box_init(cx_push(cx_scope(cx, 0)), cx->coro_type)->as_ptr = coro;
   }
   
   cx->stop_pc = cx->pc+1;
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
-  return x->as_coro == y->as_coro;
+  return x->as_ptr == y->as_ptr;
 }
 
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  struct cx_coro *coro = value->as_coro;
+  struct cx_coro *coro = value->as_ptr;
   
   if (coro->done) {
     cx_error(cx, cx->row, cx->col, "Coro is done");
@@ -80,17 +80,18 @@ static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
 }
 
 static void copy_imp(struct cx_box *dst, struct cx_box *src) {
-  struct cx_coro *c = src->as_coro;
-  dst->as_coro = c;
+  struct cx_coro *c = src->as_ptr;
+  dst->as_ptr = c;
   c->nrefs++;
 }
 
-static void fprint_imp(struct cx_box *value, FILE *out) { 
-  fprintf(out, "Coro(%p:%d)", value->as_coro, value->as_coro->nrefs);
+static void fprint_imp(struct cx_box *value, FILE *out) {
+  struct cx_coro *coro = value->as_ptr;
+  fprintf(out, "Coro(%p:%d)", coro, coro->nrefs);
 }
 
 static void deinit_imp(struct cx_box *value) {
-  struct cx_coro *coro = value->as_coro;
+  struct cx_coro *coro = value->as_ptr;
   cx_ok(coro->nrefs > 0);
   coro->nrefs--;
   if (!coro->nrefs) { free(cx_coro_deinit(coro)); }

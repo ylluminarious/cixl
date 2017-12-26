@@ -139,16 +139,17 @@ bool cx_funcall(struct cx_func *func, struct cx_scope *scope, int row, int col) 
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
-  return x->as_func == y->as_func;
+  return x->as_ptr == y->as_ptr;
 }
 
 static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
-  return cx_funcall(value->as_func, scope, cx->row, cx->col);
+  return cx_funcall(value->as_ptr, scope, cx->row, cx->col);
 }
 
 static void fprint_imp(struct cx_box *value, FILE *out) {
-  fprintf(out, "Func(%s)", value->as_func->id);
+  struct cx_func *func = value->as_ptr;
+  fprintf(out, "Func(%s)", func->id);
 }
 
 struct cx_type *cx_init_func_type(struct cx *cx) {

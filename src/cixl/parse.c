@@ -58,7 +58,7 @@ bool cx_parse_id(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 
 	  if (ref) {
 	    struct cx_box *box = cx_box_new(cx->func_type);
-	    box->as_func = f;
+	    box->as_ptr = f;
 	    cx_tok_init(cx_vec_push(out), CX_TLITERAL, box, cx->row, cx->col);
 	  } else {
 	    cx_tok_init(cx_vec_push(out), CX_TFUNC, f, cx->row, cx->col);

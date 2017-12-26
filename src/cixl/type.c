@@ -44,23 +44,24 @@ bool cx_type_is(struct cx_type *type, struct cx_type *parent) {
 
 static void type_imp(struct cx_scope *scope) {
   struct cx_box x = *cx_ok(cx_pop(scope, false));
-  cx_box_init(cx_push(scope), scope->cx->meta_type)->as_type = x.type;
+  cx_box_init(cx_push(scope), scope->cx->meta_type)->as_ptr = x.type;
 }
 
 static void is_imp(struct cx_scope *scope) {
   struct cx_type
-    *y = cx_ok(cx_pop(scope, false))->as_type,
-    *x = cx_ok(cx_pop(scope, false))->as_type;
+    *y = cx_ok(cx_pop(scope, false))->as_ptr,
+    *x = cx_ok(cx_pop(scope, false))->as_ptr;
 
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_type_is(x, y);
 }
 
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
-  return x->as_type == y->as_type;
+  return x->as_ptr == y->as_ptr;
 }
 
 static void fprint_imp(struct cx_box *value, FILE *out) {
-  fputs(value->as_type->id, out);
+  struct cx_type *type = value->as_ptr;
+  fputs(type->id, out);
 }
 
 struct cx_type *cx_init_meta_type(struct cx *cx) {
