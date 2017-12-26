@@ -68,7 +68,7 @@ But unlike Forth, functions scan forward until enough arguments are on the stack
 [9]
 ```
 
-The ```,``` operator may be used to cut the token stream into discrete pieces and force functions to scan forward.
+The ```,``` operator may be used to cut the stack into discrete pieces and force functions to scan forward.
 
 ```
 > 1 + 2
