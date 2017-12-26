@@ -8,18 +8,17 @@
 #include "cixl/scope.h"
 #include "cixl/type.h"
 
-static bool default_call(struct cx_box *value, struct cx_scope *scope) {
-  cx_box_copy(cx_push(scope), value);
-  return true;
-}
-
 struct cx_type *cx_type_init(struct cx_type *type, const char *id) {
   type->id = strdup(id);
   cx_set_init(&type->parents, sizeof(struct cx_type *), cx_cmp_ptr);
-  type->call = default_call;
+  
+  type->eqval = NULL;
+  type->equid = NULL;
+  type->call = NULL;
   type->copy = NULL;
   type->fprint = NULL;
   type->deinit = NULL;
+
   return type;
 }
 
@@ -56,16 +55,21 @@ static void is_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_type_is(x, y);
 }
 
-static void fprint(struct cx_box *value, FILE *out) {
+static bool equid_imp(struct cx_box *x, struct cx_box *y) {
+  return x->as_type == y->as_type;
+}
+
+static void fprint_imp(struct cx_box *value, FILE *out) {
   fputs(value->as_type->id, out);
 }
 
 struct cx_type *cx_init_meta_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Type", cx->any_type, NULL);
-  t->fprint = fprint;
-
+  t->equid = equid_imp;
+  t->fprint = fprint_imp;
+  
   cx_add_func(cx, "type", cx_arg(cx->any_type))->ptr = type_imp;
-  cx_add_func(cx, "is", cx_arg(cx->any_type), cx_arg(t))->ptr = is_imp;
+  cx_add_func(cx, "is?", cx_arg(cx->any_type), cx_arg(t))->ptr = is_imp;
 
   return t;
 }

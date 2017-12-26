@@ -19,6 +19,18 @@ static void run(struct cx *cx, const char *in) {
   }
 }
 
+static void type_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "42 type Int = test");
+  run(&cx, "Int is? A test");
+  run(&cx, "not (A is? Int) test");
+
+  cx_deinit(&cx);
+}
+
+
 static void int_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -79,6 +91,7 @@ static void coro_tests() {
 }
 
 void cx_tests() {
+  type_tests();
   int_tests();
   stack_tests();
   group_tests();

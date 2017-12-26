@@ -50,7 +50,11 @@ static void yield_imp(struct cx_scope *scope) {
   cx->stop_pc = cx->pc+1;
 }
 
-static bool call(struct cx_box *value, struct cx_scope *scope) {
+static bool equid_imp(struct cx_box *x, struct cx_box *y) {
+  return x->as_coro == y->as_coro;
+}
+
+static bool call_imp(struct cx_box *value, struct cx_scope *scope) {
   struct cx *cx = scope->cx;
   struct cx_coro *coro = value->as_coro;
   
@@ -75,17 +79,17 @@ static bool call(struct cx_box *value, struct cx_scope *scope) {
   return true;
 }
 
-static void fprint(struct cx_box *value, FILE *out) { 
-  fprintf(out, "Coro(%p:%d)", value->as_coro, value->as_coro->nrefs);
-}
-
-static void copy(struct cx_box *dst, struct cx_box *src) {
+static void copy_imp(struct cx_box *dst, struct cx_box *src) {
   struct cx_coro *c = src->as_coro;
   dst->as_coro = c;
   c->nrefs++;
 }
 
-static void deinit(struct cx_box *value) {
+static void fprint_imp(struct cx_box *value, FILE *out) { 
+  fprintf(out, "Coro(%p:%d)", value->as_coro, value->as_coro->nrefs);
+}
+
+static void deinit_imp(struct cx_box *value) {
   struct cx_coro *coro = value->as_coro;
   cx_ok(coro->nrefs > 0);
   coro->nrefs--;
@@ -94,10 +98,11 @@ static void deinit(struct cx_box *value) {
 
 struct cx_type *cx_init_coro_type(struct cx *cx) {
   struct cx_type *t = cx_add_type(cx, "Coro", cx->any_type, NULL);
-  t->fprint = fprint;
-  t->call = call;
-  t->copy = copy;
-  t->deinit = deinit;
+  t->equid = equid_imp;
+  t->call = call_imp;
+  t->copy = copy_imp;
+  t->fprint = fprint_imp;
+  t->deinit = deinit_imp;
 
   cx_add_func(cx, "yield")->ptr = yield_imp;
 

@@ -1,5 +1,6 @@
 #include "cixl/box.h"
 #include "cixl/error.h"
+#include "cixl/scope.h"
 #include "cixl/type.h"
 
 struct cx_box *cx_box_new(struct cx_type *type) {
@@ -16,7 +17,21 @@ struct cx_box *cx_box_deinit(struct cx_box *box) {
   return box;
 }
 
+bool cx_eqval(struct cx_box *x, struct cx_box *y) {
+  if (!x->type->eqval) { return cx_equid(x, y); }
+  return cx_ok(x->type->eqval)(x, y);
+}
+
+bool cx_equid(struct cx_box *x, struct cx_box *y) {
+  return cx_ok(x->type->equid)(x, y);
+}
+
 bool cx_box_call(struct cx_box *box, struct cx_scope *scope) {
+  if (!box->type->call) {
+    cx_box_copy(cx_push(scope), box);
+    return true;
+  }
+  
   return box->type->call(box, scope);
 }
 

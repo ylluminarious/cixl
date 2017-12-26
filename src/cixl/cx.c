@@ -186,6 +186,22 @@ static void call_imp(struct cx_scope *scope) {
   cx_box_deinit(&x);
 }
 
+static void eqval_imp(struct cx_scope *scope) {
+  struct cx_box
+    y = *cx_ok(cx_pop(scope, false)),
+    x = *cx_ok(cx_pop(scope, false));
+  
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_eqval(&x, &y);
+}
+
+static void equid_imp(struct cx_scope *scope) {
+  struct cx_box
+    y = *cx_ok(cx_pop(scope, false)),
+    x = *cx_ok(cx_pop(scope, false));
+  
+  cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_equid(&x, &y);
+}
+
 static void test_imp(struct cx_scope *scope) {
   struct cx_box x = *cx_ok(cx_pop(scope, false));
   struct cx *cx = scope->cx;
@@ -233,6 +249,8 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "cls")->ptr = cls_imp;
 
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
+  cx_add_func(cx, "=", cx_arg(cx->any_type), cx_arg(cx->any_type))->ptr = eqval_imp;
+  cx_add_func(cx, "==", cx_arg(cx->any_type), cx_arg(cx->any_type))->ptr = equid_imp;
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
   cx->main = cx_begin(cx, false);

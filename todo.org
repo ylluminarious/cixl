@@ -1,4 +1,10 @@
-* add type tests from readme
+* add type->eqval/equid
+** eqval defaults to equid
+** change = to call eqval
+** add == for equid
+* add str support
+** dup on box copy
+** add ? func (!= 0)
 * add if fn
 * add recall
 ** forced tail call
@@ -14,9 +20,6 @@
 ** add push fn
 * add stash/splat funcs
 * add Rat type
-* add str support
-** dup on box copy
-** add ? func (!= 0)
 * add Opt type
 ** add Vec pop fn
 * add parse/eval

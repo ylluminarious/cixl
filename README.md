@@ -83,7 +83,7 @@ Any name that starts with an uppercase letter is treated as a type reference. Th
 > type 42
 [Int]
 
-> is A
+> is? A
 [t]
 ```
 
