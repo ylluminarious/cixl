@@ -1,6 +1,6 @@
 * add if fn
 * add recall
-** forced tail call
+** call imp in same scope
 ** fib
 * add clock fn
 ** measure time for call and push nsecs
