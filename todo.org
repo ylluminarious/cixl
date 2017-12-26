@@ -1,3 +1,4 @@
+* add goto/label and convert lambdas
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
@@ -16,6 +17,3 @@
 *** add func ref to imp struct
 * change lambda init/deinit to new/ref/unref
 * change coro init/deinit to new/ref/unref
-
-func: _fib(a b n Int) $n ? if {$b $a $b + $n -- recall} $a;
-func: fib(n Int) 0 1 $n _fib;
