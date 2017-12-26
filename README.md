@@ -116,6 +116,11 @@ And identity:
 [f]
 ```
 
+```
+> 42 == 42
+[t]
+```
+
 ### Scopes
 Enclosing code in parens evaluates it in a separate scope with a clean stack. The last value on the stack is automatically returned on scope exit.
 
