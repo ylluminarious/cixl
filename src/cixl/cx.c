@@ -201,6 +201,17 @@ static void equid_imp(struct cx_scope *scope) {
   cx_box_deinit(&y);
 }
 
+static void if_imp(struct cx_scope *scope) {
+  struct cx_box
+    y = *cx_ok(cx_pop(scope, false)),
+    x = *cx_ok(cx_pop(scope, false)),
+    cond = *cx_ok(cx_pop(scope, false));
+  
+  cx_box_call(cond.as_bool ? &x : &y, scope);
+  cx_box_deinit(&x);
+  cx_box_deinit(&y);
+}
+
 static void call_imp(struct cx_scope *scope) {
   struct cx_box x = *cx_ok(cx_pop(scope, false));
   cx_box_call(&x, scope);
@@ -273,6 +284,11 @@ struct cx *cx_init(struct cx *cx) {
 
   cx_add_func(cx, "=", cx_arg(cx->any_type), cx_narg(0))->ptr = eqval_imp;
   cx_add_func(cx, "==", cx_arg(cx->any_type), cx_narg(0))->ptr = equid_imp;
+
+  cx_add_func(cx, "if",
+	      cx_arg(cx->bool_type),
+	      cx_arg(cx->any_type),
+	      cx_arg(cx->any_type))->ptr = if_imp;
 
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
   cx_add_func(cx, "recall")->ptr = recall_imp;

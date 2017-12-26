@@ -207,6 +207,17 @@ Several parameters may share the same type. An index may may be specified instea
 [9]
 ```
 
+```recall``` may be used to call the current function in the same scope:
+
+```
+> func: _fib(a b n Int)
+..  $n ? if {$b $a $b + $n -- recall} $a;
+..func: fib(n Int)
+..  _fib 0 1 $n;
+..fib 50
+[12586269025]
+```
+
 ### Coroutines
 Coroutines allow stopping execution and resuming in the same scope later on. A coroutine context is returned on first yield, and ```call```-ing it picks up the trail from previous ```yield```.
 

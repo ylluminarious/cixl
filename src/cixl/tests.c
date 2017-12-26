@@ -83,6 +83,10 @@ static void func_tests() {
   run(&cx, "func: bar(x A) $x + 35; bar 7 42 = test");
   run(&cx, "func: baz(x y Int z 0) $x + $y + $z; baz 1 3 5 9 = test");
 
+  run(&cx,
+      "func: fib(a b n Int) $n ? if {$b $a $b + $n -- recall} $a;"
+      "fib 0 1 50 = 12586269025 test");
+  
   cx_deinit(&cx);
 }
 

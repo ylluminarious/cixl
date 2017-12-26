@@ -92,9 +92,9 @@ struct cx_func_imp *cx_func_add_imp(struct cx_func *func,
 }
 
 bool cx_func_imp_match(struct cx_func_imp *imp, struct cx_vec *stack) {
-    for (int i = 0, j = stack->count-1;
-	 i < imp->args.count && j >= 0;
-	 i++, j--) {
+    for (int i = imp->args.count-1, j = stack->count-1;
+	 i >= 0  && j >= 0;
+	 i--, j--) {
       struct cx_func_arg *imp_arg = cx_vec_get(&imp->args, i);
 
       struct cx_type *imp_type = imp_arg->type
