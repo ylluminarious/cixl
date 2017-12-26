@@ -207,7 +207,7 @@ Several parameters may share the same type. An index may may be specified instea
 [9]
 ```
 
-```recall``` may be used to call the current function in the same scope:
+```recall``` may be used to call the current function recursively in the same scope:
 
 ```
 > func: _fib(a b n Int)
