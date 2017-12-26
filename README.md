@@ -293,9 +293,10 @@ In the example below, ```foo``` manipulates the main stack through the passed in
 - Orthogonal is better
 - Terseness counts
 - There is no right way to do it
-- Obvious is subjective and overrated
+- Obvious is overrated
 - Rules are for machines
 - Only fools predict the future
+- Intuition goes with the flow
 - Namespaces are one honking great idea
 
 ### License
