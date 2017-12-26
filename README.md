@@ -107,17 +107,20 @@ Two flavors of equality are provided.
 Value equality:
 ```
 > 'foo' = 'foo'
+..
 [t]
 ```
 
 And identity:
 ```
 > 'foo' == 'foo'
+..
 [f]
 ```
 
 ```
 > 42 == 42
+..
 [t]
 ```
 
@@ -244,7 +247,7 @@ Yielding from a lambda inherits the lambda definition scope.
 [42]
 ```
 
-Yielding from main also works. In the example below, ```foo``` is able to clear the main stack by calling the passed in coroutine. 
+Yielding from main also works. In the example below, ```foo``` manipulates the main stack through the passed in coroutine.
 
 ```
 > 1 2 yield cls 3 4
