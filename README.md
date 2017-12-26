@@ -77,6 +77,7 @@ Any name that starts with an uppercase letter is treated as a type reference. Th
 - Func (A)
 - Int  (A)
 - Lambda (A)
+- Str (A)
 - Type (A)
 
 ```
@@ -98,6 +99,21 @@ Named variables may be bound once per scope using the ```let:``` macro.
 > $foo
 ..
 [42]
+```
+
+### Equality
+Two flavors of equality are provided.
+
+Value equality:
+```
+> 'foo' = 'foo'
+[t]
+```
+
+And identity:
+```
+> 'foo' == 'foo'
+[f]
 ```
 
 ### Scopes

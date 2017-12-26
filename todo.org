@@ -1,6 +1,3 @@
-* add str support
-** dup on box copy
-** add ? func (!= 0)
 * add if fn
 * add recall
 ** forced tail call

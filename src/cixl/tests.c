@@ -30,7 +30,6 @@ static void type_tests() {
   cx_deinit(&cx);
 }
 
-
 static void int_tests() {
   struct cx cx;
   cx_init(&cx);
@@ -39,6 +38,19 @@ static void int_tests() {
   run(&cx, "0 ? not test");
   run(&cx, "21 + 21 = 42 test");
   run(&cx, "1 = 2 not test");
+
+  cx_deinit(&cx);
+}
+
+static void str_tests() {
+  struct cx cx;
+  cx_init(&cx);
+
+  run(&cx, "'foo' ? test");
+  run(&cx, "'' ? not test");
+  run(&cx, "'foo' = 'foo' test");
+  run(&cx, "'foo' = 'bar' not test");
+  run(&cx, "'foo' == 'foo' not test");
 
   cx_deinit(&cx);
 }
@@ -93,6 +105,7 @@ static void coro_tests() {
 void cx_tests() {
   type_tests();
   int_tests();
+  str_tests();
   stack_tests();
   group_tests();
   func_tests();

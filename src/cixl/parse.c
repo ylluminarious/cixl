@@ -119,6 +119,41 @@ bool cx_parse_int(struct cx *cx, FILE *in, struct cx_vec *out) {
   }
 }
 
+bool cx_parse_str(struct cx *cx, FILE *in, struct cx_vec *out) {
+  struct cx_buf value;
+  cx_buf_open(&value);
+  int row = cx->row, col = cx->col;
+  bool ok = false;
+  
+  while (true) {
+    char c = fgetc(in);
+
+    if (c == EOF) {
+      cx_error(cx, row, col, "Unterminated Str");
+      goto exit;
+    }
+      
+    if (c == '\'') { break; }
+    fputc(c, value.stream);
+    cx->col++;
+  }
+
+  ok = true;
+ exit: {
+    cx_buf_close(&value);
+    
+    if (ok) {
+      struct cx_box *box = cx_box_new(cx->str_type);
+      box->as_ptr = value.data;
+      cx_tok_init(cx_vec_push(out), CX_TLITERAL, box, row, col);
+    } else {
+      free(value.data);
+    }
+    
+    return ok;
+  }
+}
+
 bool cx_parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   int row = cx->row, col = cx->col;
   struct cx_vec *body = cx_vec_init(malloc(sizeof(struct cx_vec)),
@@ -197,7 +232,9 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 	return cx_parse_lambda(cx, in, out, lookup);
       case '}':
 	cx_tok_init(cx_vec_push(out), CX_TUNLAMBDA, NULL, row, col);
-	return true;	
+	return true;
+      case '\'':
+	return cx_parse_str(cx, in, out);
       default:
 	if (isdigit(c)) {
 	  ungetc(c, in);

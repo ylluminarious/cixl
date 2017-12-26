@@ -13,6 +13,7 @@
 #include "cixl/lambda.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
+#include "cixl/str.h"
 #include "cixl/type.h"
 
 static const void *get_type_id(const void *value) {
@@ -180,18 +181,14 @@ static void cls_imp(struct cx_scope *scope) {
   cx_vec_clear(&scope->stack);
 }
 
-static void call_imp(struct cx_scope *scope) {
-  struct cx_box x = *cx_ok(cx_pop(scope, false));
-  cx_box_call(&x, scope);
-  cx_box_deinit(&x);
-}
-
 static void eqval_imp(struct cx_scope *scope) {
   struct cx_box
     y = *cx_ok(cx_pop(scope, false)),
     x = *cx_ok(cx_pop(scope, false));
   
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_eqval(&x, &y);
+  cx_box_deinit(&x);
+  cx_box_deinit(&y);
 }
 
 static void equid_imp(struct cx_scope *scope) {
@@ -200,6 +197,14 @@ static void equid_imp(struct cx_scope *scope) {
     x = *cx_ok(cx_pop(scope, false));
   
   cx_box_init(cx_push(scope), scope->cx->bool_type)->as_bool = cx_equid(&x, &y);
+  cx_box_deinit(&x);
+  cx_box_deinit(&y);
+}
+
+static void call_imp(struct cx_scope *scope) {
+  struct cx_box x = *cx_ok(cx_pop(scope, false));
+  cx_box_call(&x, scope);
+  cx_box_deinit(&x);
 }
 
 static void test_imp(struct cx_scope *scope) {
@@ -240,6 +245,7 @@ struct cx *cx_init(struct cx *cx) {
   cx->meta_type = cx_init_meta_type(cx);
   cx->bool_type = cx_init_bool_type(cx);
   cx->int_type = cx_init_int_type(cx);
+  cx->str_type = cx_init_str_type(cx);
   cx->func_type = cx_init_func_type(cx);
   cx->lambda_type = cx_init_lambda_type(cx);
   cx->coro_type = cx_init_coro_type(cx);
@@ -248,9 +254,10 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "zap", cx_arg(cx->any_type))->ptr = zap_imp;
   cx_add_func(cx, "cls")->ptr = cls_imp;
 
+  cx_add_func(cx, "=", cx_arg(cx->any_type), cx_narg(0))->ptr = eqval_imp;
+  cx_add_func(cx, "==", cx_arg(cx->any_type), cx_narg(0))->ptr = equid_imp;
+
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
-  cx_add_func(cx, "=", cx_arg(cx->any_type), cx_arg(cx->any_type))->ptr = eqval_imp;
-  cx_add_func(cx, "==", cx_arg(cx->any_type), cx_arg(cx->any_type))->ptr = equid_imp;
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
   cx->main = cx_begin(cx, false);
