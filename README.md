@@ -1,7 +1,7 @@
 <a href="https://liberapay.com/basic-gongfu/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 
 ## cixl
-#### a minimalistic scripting language
+#### a minimal scripting language
 
 This project aims to produce a minimalistic scripting language, or DSL substrate; in C. In a way, it's Lua taken one step further down the path of simplicity. The implementation is a hybrid interpreter/vm design, designed to be as fast as possible without compromising on simplicity, transparency and flexibility.
 
