@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cixl/box.h"
 #include "cixl/buf.h"
 #include "cixl/cx.h"
 #include "cixl/error.h"
@@ -10,12 +11,23 @@
 #include "cixl/scope.h"
 
 void cx_repl(FILE *in, FILE *out) {
-  fprintf(out, "cixl v%s\n\n", CX_VERSION);
-  fputs("Press Return twice to eval input.\n\n", out);
-
   struct cx cx;
   cx_init(&cx);
-  
+
+  fprintf(out, "cixl v%s, ", CX_VERSION);
+
+  if (cx_eval_str(&cx,
+		  "func: _fib(a b n Int) $n ? if {$b, $a + $b, -- $n recall} $a;"
+		  "func: fib(n Int) _fib 0 1 $n;"
+		  "1000000000, clock {fib 30 zap} /")) {
+    struct cx_box bmips = *cx_pop(cx.main, false);
+    fprintf(out, "%zd bmips\n\n", bmips.as_int);
+  } else {
+    fputs("? bmips\n\n", out);
+  }
+
+  fputs("Press Return twice to eval input.\n\n", out);
+    
   struct cx_buf body;
   cx_buf_open(&body);
   char line[CX_REPL_LINE_MAX];

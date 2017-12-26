@@ -179,6 +179,7 @@ bool cx_parse_group(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
 bool cx_parse_lambda(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
   int row = cx->row, col = cx->col;
   struct cx_vec *body = cx_vec_new(sizeof(struct cx_tok));
+  cx_tok_init(cx_vec_push(body), CX_TCUT, NULL, row, col);
   
   while (true) {
     if (!cx_parse_tok(cx, in, body, lookup)) {

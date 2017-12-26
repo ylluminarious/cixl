@@ -14,6 +14,7 @@
 #include "cixl/parse.h"
 #include "cixl/scope.h"
 #include "cixl/str.h"
+#include "cixl/timer.h"
 #include "cixl/type.h"
 
 static const void *get_type_id(const void *value) {
@@ -234,6 +235,16 @@ static void recall_imp(struct cx_scope *scope) {
   cx_eval(cx, &cx->func_imp->toks, 0); 
 }
 
+static void clock_imp(struct cx_scope *scope) {
+  struct cx_box x = *cx_ok(cx_pop(scope, false));
+  cx_timer_t timer;
+  cx_timer_reset(&timer);
+  cx_box_call(&x, scope);
+  cx_box_deinit(&x);
+  
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = cx_timer_ns(&timer);;
+}
+
 static void test_imp(struct cx_scope *scope) {
   struct cx_box x = *cx_ok(cx_pop(scope, false));
   struct cx *cx = scope->cx;
@@ -293,6 +304,7 @@ struct cx *cx_init(struct cx *cx) {
   cx_add_func(cx, "call", cx_arg(cx->any_type))->ptr = call_imp;
   cx_add_func(cx, "recall")->ptr = recall_imp;
 
+  cx_add_func(cx, "clock", cx_arg(cx->any_type))->ptr = clock_imp;
   cx_add_func(cx, "test", cx_arg(cx->bool_type))->ptr = test_imp;
   
   cx->main = cx_begin(cx, false);

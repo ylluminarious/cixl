@@ -42,6 +42,16 @@ static void sub_imp(struct cx_scope *scope) {
   cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int - y.as_int;
 }
 
+static void mul_imp(struct cx_scope *scope) {
+  struct cx_box y = *cx_ok(cx_pop(scope, false)), x = *cx_ok(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int * y.as_int;
+}
+
+static void div_imp(struct cx_scope *scope) {
+  struct cx_box y = *cx_ok(cx_pop(scope, false)), x = *cx_ok(cx_pop(scope, false));
+  cx_box_init(cx_push(scope), scope->cx->int_type)->as_int = x.as_int / y.as_int;
+}
+
 static bool equid_imp(struct cx_box *x, struct cx_box *y) {
   return x->as_int == y->as_int;
 }
@@ -64,6 +74,8 @@ struct cx_type *cx_init_int_type(struct cx *cx) {
 
   cx_add_func(cx, "+", cx_arg(t), cx_arg(t))->ptr = add_imp;
   cx_add_func(cx, "-", cx_arg(t), cx_arg(t))->ptr = sub_imp;
+  cx_add_func(cx, "*", cx_arg(t), cx_arg(t))->ptr = mul_imp;
+  cx_add_func(cx, "/", cx_arg(t), cx_arg(t))->ptr = div_imp;
 
   return t;
 }

@@ -4,11 +4,11 @@
 * add clock fn
 ** clock {...}
 ** return duration for call in ns
-* add forward scanning to recall
-** convert to macro
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
+* add forward scanning to recall
+** convert to macro
 * change func imps to return bool
 * add Vect type
 ** add cx_vect struct with vec & nrefs
@@ -25,3 +25,5 @@
 *** add func ref to imp struct
 
 func: _fib(a b n Int) $n ? if {$b, $a + $b, -- $n recall} $a;
+
+1000000000, clock {fib 50} /
