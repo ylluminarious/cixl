@@ -278,7 +278,7 @@ In the example below, ```foo``` manipulates the main stack through the passed in
 
 Orthogonal is better
 Terseness counts
-There should be ways to do it
+There should be at least one way to do it
 Obvious is overrated
 Rules are for machines
 Namespaces are one honking great idea -- let's do more of those!
