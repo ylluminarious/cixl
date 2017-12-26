@@ -281,7 +281,7 @@ In the example below, ```foo``` manipulates the main stack through the passed in
 - There should be at least one way to do it
 - Obvious is overrated
 - Rules are for machines
-- Namespaces are one honking great idea -- let's do more of those!
+- Namespaces are one honking great idea
 
 ### License
 GPLv3
