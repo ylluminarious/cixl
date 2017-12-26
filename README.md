@@ -225,7 +225,7 @@ Several parameters may share the same type. An index may may be specified instea
 
 ```
 > func: _fib(a b n Int)
-..  $n ? if {$b $a $b + $n -- recall} $a;
+..  $n ? if {$b, $a + $b, -- $n recall} $a;
 ..func: fib(n Int)
 ..  _fib 0 1 $n;
 ..fib 50

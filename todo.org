@@ -4,6 +4,8 @@
 * add clock fn
 ** clock {...}
 ** return duration for call in ns
+* add forward scanning to recall
+** convert to macro
 * add CX_TTYPE
 ** lookup types on parse
 ** change CX_ID where used as type
@@ -22,3 +24,4 @@
 ** add CX_TFUNC_IMP
 *** add func ref to imp struct
 
+func: _fib(a b n Int) $n ? if {$b, $a + $b, -- $n recall} $a;

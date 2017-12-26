@@ -81,7 +81,7 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
     return -1;
   }
 
-  scope->cut_offs -= cx_min(scope->cut_offs, func->nargs);  
+  scope->cut_offs = 0;
   return cx_funcall(func, scope, row, col) ? pc : -1;
 }
 
