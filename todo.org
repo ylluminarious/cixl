@@ -1,4 +1,6 @@
 * add if fn
+** add recall test
+** add recall example to readme
 * add fib
 * add clock fn
 ** measure time for call and push nsecs
