@@ -295,6 +295,7 @@ In the example below, ```foo``` manipulates the main stack through the passed in
 - There should be at least one way to do it
 - Obvious is overrated
 - Rules are for machines
+- Only fools predict the future
 - Namespaces are one honking great idea
 
 ### License
