@@ -274,6 +274,15 @@ In the example below, ```foo``` manipulates the main stack through the passed in
 [3 4]
 ````
 
+### Zen
+
+Orthogonal is better
+Terseness counts
+There should be ways to do it
+Obvious is overrated
+Rules are for machines
+Namespaces are one honking great idea -- let's do more of those!
+
 ### License
 GPLv3
 
