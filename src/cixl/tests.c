@@ -37,6 +37,7 @@ static void int_tests() {
   run(&cx, "42 ? test");
   run(&cx, "0 ? not test");
   run(&cx, "21 + 21 = 42 test");
+  run(&cx, "7 + 14, 7 + 14 + = 42 test");
   run(&cx, "1 = 2 not test");
 
   cx_deinit(&cx);

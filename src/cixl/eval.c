@@ -10,6 +10,7 @@
 #include "cixl/lambda.h"
 #include "cixl/parse.h"
 #include "cixl/scope.h"
+#include "cixl/util.h"
 #include "cixl/vec.h"
 
 ssize_t cx_eval_id(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
@@ -67,7 +68,9 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
   struct cx_func *func = t->data;
   int row = cx->row, col = cx->col;
   
-  while (pc < toks->count && cx_scope(cx, 0)->stack.count < func->nargs) {
+  while (pc < toks->count) {
+    struct cx_scope *s = cx_scope(cx, 0);
+    if (s->stack.count - s->cut_offs >= func->nargs) { break; }
     if ((pc = cx_eval_tok(cx, toks, pc)) == -1) { return -1; }
   }
 
@@ -78,6 +81,7 @@ ssize_t cx_eval_func(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
     return -1;
   }
 
+  scope->cut_offs -= cx_min(scope->cut_offs, func->nargs);  
   return cx_funcall(func, scope, row, col) ? pc : -1;
 }
 
@@ -110,11 +114,16 @@ ssize_t cx_eval_tok(struct cx *cx, struct cx_vec *toks, ssize_t pc) {
     return cx_eval_literal(cx, toks, pc);
   case CX_TMACRO:
     return cx_eval_macro(cx, toks, pc);
+  case CX_TCUT: {
+    struct cx_scope *s = cx_scope(cx, 0);
+    s->cut_offs = s->stack.count;
+    return pc+1;
+  }
   default:
+    cx_error(cx, t->row, t->col, "Unexpected token: %d", t->type);
     break;
   }
 
-  cx_error(cx, t->row, t->col, "Unexpected token: %d", t->type);
   return -1;
 }
 

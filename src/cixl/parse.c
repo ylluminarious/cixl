@@ -220,6 +220,9 @@ bool cx_parse_tok(struct cx *cx, FILE *in, struct cx_vec *out, bool lookup) {
       case '\n':
 	cx->row++;
 	break;
+      case ',':
+	cx_tok_init(cx_vec_push(out), CX_TCUT, NULL, row, col);
+	return true;
       case ';':
 	cx_tok_init(cx_vec_push(out), CX_TEND, NULL, row, col);
 	return true;

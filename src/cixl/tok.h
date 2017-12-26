@@ -1,8 +1,8 @@
 #ifndef CX_TOK_H
 #define CX_TOK_H
 
-enum cx_tok_type { CX_TEND, CX_TFUNC, CX_TGROUP, CX_TID, CX_TLAMBDA, CX_TLITERAL,
-		   CX_TMACRO, CX_TUNGROUP, CX_TUNLAMBDA };
+enum cx_tok_type { CX_TCUT, CX_TEND, CX_TFUNC, CX_TGROUP, CX_TID, CX_TLAMBDA,
+		   CX_TLITERAL, CX_TMACRO, CX_TUNGROUP, CX_TUNLAMBDA };
 
 struct cx_tok {
   enum cx_tok_type type;

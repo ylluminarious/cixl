@@ -68,6 +68,20 @@ But unlike Forth, functions scan forward until enough arguments are on the stack
 [9]
 ```
 
+The ```,``` operator may be used to cut the token stream into discrete pieces and force functions to scan forward.
+
+```
+> 1 + 2
+..3 + 4
+..
+[6 4]
+
+> 1 + 2,
+..3 + 4
+..
+[3 7]
+```
+
 ### Types
 Names that start with an uppercase letter are treated as type references. The following types are defined out of the box:
 
